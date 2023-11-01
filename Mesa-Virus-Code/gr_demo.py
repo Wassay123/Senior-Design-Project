@@ -31,7 +31,7 @@ def run_simulation(steps, num_nodes, avg_node_degree, initial_outbreak_size, vir
     plt.grid(False)
     
     #network graph 
-    fig2 = plt.figure(figsize=(7, 4.5))
+    fig2 = plt.figure(figsize=(7, 4))
 
     G = model.G
     network_representation = network_portrayal(G)
@@ -44,7 +44,7 @@ def run_simulation(steps, num_nodes, avg_node_degree, initial_outbreak_size, vir
     for edge_data in network_representation["edges"]:
         g.add_edge(edge_data["source"], edge_data["target"], color=edge_data["color"], width=edge_data["width"])
         
-    pos = nx.spring_layout(g)  
+    pos = nx.kamada_kawai_layout(g)  
     
     node_colors = [g.nodes[node]["color"] for node in g.nodes]
     node_sizes = [g.nodes[node]["size"] * 30 for node in g.nodes]
