@@ -6,10 +6,6 @@ import networkx as nx
 from matplotlib.lines import Line2D
 import time
 import geopandas
-import geoplot
-import numpy as np
-import pandas as pd
-import geopandas
 import geodatasets
 import contextily as cx
 import random
