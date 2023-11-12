@@ -1,7 +1,7 @@
 import gradio as gr
 import matplotlib.pyplot as plt
 from virus_on_network.model import State, VirusOnNetwork, number_infected, number_susceptible, number_resistant
-from virus_on_network.server2 import get_resistant_susceptible_ratio, network_portrayal
+from virus_on_network.server import get_resistant_susceptible_ratio, network_portrayal
 import networkx as nx
 from matplotlib.lines import Line2D
 import time
@@ -12,6 +12,7 @@ import pandas as pd
 import geopandas
 import geodatasets
 import contextily as cx
+import random
 
 
 
@@ -21,7 +22,19 @@ def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size
     infected_nodes = [number_infected(model)] 
     resitant_nodes =[number_resistant(model)]
     susceptible_nodes = [number_susceptible(model)] 
-    node_pos = []   
+    node_pos = []
+    
+    for node in range(num_nodes):
+        # if EPSG:4326
+        # ny_lat_min, ny_lat_max = 40.4774, 40.9176
+        # ny_lon_min, ny_lon_max = -74.2591, -73.7004
+        # if ESPG:3857
+        ny_lat_min, ny_lat_max = 4935561.210052161, 5000195.269395372
+        ny_lon_min, ny_lon_max = -8266485.198766782, -8204290.999260579
+        random_lat = random.uniform(ny_lat_min, ny_lat_max)
+        random_lon = random.uniform(ny_lon_min, ny_lon_max)
+        node_pos.append((random_lon, random_lat))
+        
     
     
     while True:
@@ -38,22 +51,31 @@ def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size
         g = nx.Graph()
         
         for idx, node_data in enumerate(network_representation["nodes"]):
-            g.add_node(idx, size=node_data["size"], color=node_data["color"], tooltip=node_data["tooltip"], pos = node_data["pos"])
+            g.add_node(idx, size=node_data["size"], color=node_data["color"], tooltip=node_data["tooltip"])
 
         for edge_data in network_representation["edges"]:
             g.add_edge(edge_data["source"], edge_data["target"], color=edge_data["color"], width=edge_data["width"])
              
         node_colors = [g.nodes[node]["color"] for node in g.nodes]
         node_sizes = [g.nodes[node]["size"] * 20 for node in g.nodes]
-        node_pos = [g.nodes[node]["pos"] for node in g.nodes]
-        edge_colors = [g.edges[edge]["color"] for edge in g.edges]
-        edge_widths = [g.edges[edge]["width"] for edge in g.edges]
+    
 
         nx.draw_networkx_nodes(g, node_pos, node_size=node_sizes, node_color=node_colors)
-        # nx.draw_networkx_edges(g, node_pos, edge_color=edge_colors, width=edge_widths)
+    
         plt.tight_layout()
         plt.close(fig1)
         
+        # legend_elements = [Line2D([0], [0], marker='o', color='red', label='Infected', lw=0,
+        #                         markerfacecolor='red', markersize=10),
+        #                     Line2D([0], [0], marker='o', color='green', label='Susceptible', lw=0,
+        #                         markerfacecolor='green', markersize=10),
+        #                     Line2D([0], [0], marker = 'o', color = 'grey', label = 'Resistant', lw=0,
+        #                         markerfacecolor='grey', markersize=10)]
+        
+        # ax = plt.gca()
+        # box = ax.get_position()
+        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        # ax.legend(handles = legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
     
         if graph_type == "Line Plot":
             
@@ -112,7 +134,7 @@ with gr.Blocks(title = "Virus Model", theme = "Insuz/Mocha") as demo:
                 stop_button = gr.Button("Stop")
                 run_button = gr.Button("Run")
         with gr.Column():
-            out = [gr.Textbox(show_label= False), gr.Plot(label="Network Graph"), gr.Plot(label="Line Plot")]
+            out = [gr.Textbox(show_label= False), gr.Plot(show_label= False), gr.Plot(show_label= False)]
     run = run_button.click(fn=run_simulation, inputs=inputs, outputs = out)
     stop = stop_button.click(None, None, None, cancels = run)
     
