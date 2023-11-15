@@ -39,6 +39,7 @@ class VirusOnNetwork(mesa.Model):
         virus_check_frequency=0.4,
         recovery_chance=0.3,
         gain_resistance_chance=0.5,
+        virus_radius=1,
     ):
         self.num_nodes = num_nodes
         prob = avg_node_degree / self.num_nodes
@@ -52,6 +53,7 @@ class VirusOnNetwork(mesa.Model):
         self.virus_check_frequency = virus_check_frequency
         self.recovery_chance = recovery_chance
         self.gain_resistance_chance = gain_resistance_chance
+        self.virus_radius = virus_radius
 
         self.datacollector = mesa.DataCollector(
             {
@@ -71,6 +73,8 @@ class VirusOnNetwork(mesa.Model):
                 self.virus_check_frequency,
                 self.recovery_chance,
                 self.gain_resistance_chance,
+                self.virus_radius
+
             )
             self.schedule.add(a)
             # Add the agent to the node
@@ -112,6 +116,7 @@ class VirusAgent(mesa.Agent):
         virus_check_frequency,
         recovery_chance,
         gain_resistance_chance,
+        virus_radius
     ):
         super().__init__(unique_id, model)
 
@@ -121,10 +126,15 @@ class VirusAgent(mesa.Agent):
         self.virus_check_frequency = virus_check_frequency
         self.recovery_chance = recovery_chance
         self.gain_resistance_chance = gain_resistance_chance
+        self.virus_radius = virus_radius
 
     def try_to_infect_neighbors(self):
+        #check all agents in radius r from self
+        #if agents are in that radius then try to infect them
+        #else do nothing
+
         neighbors_nodes = self.model.grid.get_neighborhood(
-            self.pos, include_center=False
+            self.pos, include_center=False, radius=self.virus_radius
         )
         susceptible_neighbors = [
             agent
