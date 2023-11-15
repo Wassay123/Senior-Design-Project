@@ -6,15 +6,21 @@ import networkx as nx
 from matplotlib.lines import Line2D
 import time
 import geopandas
+import geoplot
+import numpy as np
+import pandas as pd
+import geopandas
 import geodatasets
 import contextily as cx
 import random
 
 
+np.random.seed(1)
 
-def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance):
+
+def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance, virus_radius):
     steps = 0
-    model = VirusOnNetwork(num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance)
+    model = VirusOnNetwork(num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance, virus_radius)
     infected_nodes = [number_infected(model)] 
     resitant_nodes =[number_resistant(model)]
     susceptible_nodes = [number_susceptible(model)] 
@@ -30,10 +36,9 @@ def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size
         random_lat = random.uniform(ny_lat_min, ny_lat_max)
         random_lon = random.uniform(ny_lon_min, ny_lon_max)
         node_pos.append((random_lon, random_lat))
-        
-    
     
     while True:
+
         df = geopandas.read_file(geodatasets.get_path("nybb"))
 
         fig1, ax = plt.subplots(figsize=(10, 10))
@@ -124,7 +129,8 @@ with gr.Blocks(title = "Virus Model", theme = "Insuz/Mocha") as demo:
                 gr.Slider(minimum=0.0, maximum=1.0, value=0.4, step=0.1, label="Virus Spread Chance"),
                 gr.Slider(minimum=0.0, maximum=1.0, value=0.4, step=0.1, label="Virus Check Frequency"),
                 gr.Slider(minimum=0.0, maximum=1.0, value=0.3, step=0.1, label="Recovery Chance"),
-                gr.Slider(minimum=0.0, maximum=1.0, value=0.5, step=0.1, label="Gain Resistance Chance")
+                gr.Slider(minimum=0.0, maximum=1.0, value=0.5, step=0.1, label="Gain Resistance Chance"),
+                gr.Slider(minimum=0, maximum=5, value=1, step=1, label="Virus Infection Radius")
             ]
             with gr.Row():
                 stop_button = gr.Button("Stop")
