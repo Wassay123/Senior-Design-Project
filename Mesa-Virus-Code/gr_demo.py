@@ -13,6 +13,18 @@ import geopandas
 import geodatasets
 import contextily as cx
 import random
+from shapely.geometry import Point
+
+def node_coords(n, polygon):
+    points = []
+    min_x, min_y, max_x, max_y = polygon.bounds
+    i= 0
+    while i < n:
+        point = Point(random.uniform(min_x, max_x), random.uniform(min_y, max_y))
+        if polygon.contains(point):
+            points.append((point.x, point.y))
+            i += 1
+    return points
 
 
 def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance, virus_radius):
@@ -21,25 +33,16 @@ def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size
     infected_nodes = [number_infected(model)] 
     resitant_nodes =[number_resistant(model)]
     susceptible_nodes = [number_susceptible(model)] 
-    node_pos = []
+
     
-    for node in range(num_nodes):
-        # if EPSG:4326
-        # ny_lat_min, ny_lat_max = 40.4774, 40.9176
-        # ny_lon_min, ny_lon_max = -74.2591, -73.7004
-        # if ESPG:3857
-        ny_lat_min, ny_lat_max = 4935561.210052161, 5000195.269395372
-        ny_lon_min, ny_lon_max = -8266485.198766782, -8204290.999260579
-        random_lat = random.uniform(ny_lat_min, ny_lat_max)
-        random_lon = random.uniform(ny_lon_min, ny_lon_max)
-        node_pos.append((random_lon, random_lat))
+    df = geopandas.read_file(geodatasets.get_path("nybb"))
+    df_wm = df.to_crs(epsg=3857) #convert coordinate system of dataset to 3857
+    
+    node_pos = node_coords(num_nodes, df_wm.unary_union)
     
     while True:
 
-        df = geopandas.read_file(geodatasets.get_path("nybb"))
-
         fig1, ax = plt.subplots(figsize=(10, 10))
-        df_wm = df.to_crs(epsg=3857)
         df_wm.plot(ax=ax, alpha=0.5, edgecolor="k")
         cx.add_basemap(ax)
         
@@ -62,18 +65,6 @@ def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size
     
         plt.tight_layout()
         plt.close(fig1)
-        
-        # legend_elements = [Line2D([0], [0], marker='o', color='red', label='Infected', lw=0,
-        #                         markerfacecolor='red', markersize=10),
-        #                     Line2D([0], [0], marker='o', color='green', label='Susceptible', lw=0,
-        #                         markerfacecolor='green', markersize=10),
-        #                     Line2D([0], [0], marker = 'o', color = 'grey', label = 'Resistant', lw=0,
-        #                         markerfacecolor='grey', markersize=10)]
-        
-        # ax = plt.gca()
-        # box = ax.get_position()
-        # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-        # ax.legend(handles = legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
     
         if graph_type == "Line Plot":
             
