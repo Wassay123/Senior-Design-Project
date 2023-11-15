@@ -15,9 +15,6 @@ import contextily as cx
 import random
 
 
-np.random.seed(1)
-
-
 def run_simulation(graph_type, num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance, virus_radius):
     steps = 0
     model = VirusOnNetwork(num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance, virus_radius)
