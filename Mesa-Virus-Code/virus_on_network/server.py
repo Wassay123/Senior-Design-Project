@@ -1,12 +1,22 @@
 import math
-
 import mesa
-
 from .model import State, VirusOnNetwork, number_infected
+import random
 
+def node_coords():
+        # if EPSG:4326
+        # ny_lat_min, ny_lat_max = 40.4774, 40.9176
+        # ny_lon_min, ny_lon_max = -74.2591, -73.7004
+        # if ESPG:3857
+        ny_lat_min, ny_lat_max = 4935561.210052161, 5000195.269395372
+        ny_lon_min, ny_lon_max = -8266485.198766782, -8204290.999260579
+        random_lat = random.uniform(ny_lat_min, ny_lat_max)
+        random_lon = random.uniform(ny_lon_min, ny_lon_max)
+        return random_lon, random_lat
 
 def network_portrayal(G):
     # The model ensures there is always 1 agent per node
+    
 
     def node_color(agent):
         return {State.INFECTED: "#FF0000", State.SUSCEPTIBLE: "#008000"}.get(
@@ -32,6 +42,7 @@ def network_portrayal(G):
             "size": 6,
             "color": node_color(agents[0]),
             "tooltip": f"id: {agents[0].unique_id}<br>state: {agents[0].state.name}",
+            "pos": (node_coords()),
         }
         for (_, agents) in G.nodes.data("agent")
     ]
