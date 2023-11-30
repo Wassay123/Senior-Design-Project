@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@2.0.0/dist/chartjs-plugin-deferred.js"></script>
+
+    <title>Virus Simulation</title>
+</head>
+<body>
+    <section class="parameterPanel allPanels" id="leftPanelContainer">
+        <h1 id="leftPanelTitle">Simulation Parameters</h1>
+            
+        <p class="namesOfParamters" id="numStepsName">Number of Steps</p>
+        <div class="slidersAndValues">
+        <input type="range" min="1" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('numSteps', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="numSteps" class="sliderValues">10</span>
+        </div>  
+
+        <p class="namesOfParamters" id="numAgentsName">Number of Agents</p>
+        <div class="slidersAndValues">
+        <input type="range" min="10" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('numAgents', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="numAgents" class="sliderValues">10</span>
+        </div>
+            
+        <p class="namesOfParamters" id="avgNodeDegreeName">Average Node Degree</p>
+        <div class="slidersAndValues">
+        <input type="range" min="3" max="8" value="3" step="1" class="allTheSliders" oninput="updateValue('avgNodeDegree', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="avgNodeDegree" class="sliderValues">3</span>
+        </div>
+
+        <p class="namesOfParamters" id="initialOUtbreakName">Initial Outbreak</p>
+        <div class="slidersAndValues">
+        <input type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('initialOutbreak', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="initialOutbreak" class="sliderValues">1</span>
+        </div>
+
+        <p class="namesOfParamters" id="virusSpreadChanceName">Virus Spread Chance</p>
+        <div class="slidersAndValues">
+        <input type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('virusSpreadChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="virusSpreadChance" class="sliderValues">0.4</span>
+        </div>
+
+        <p class="namesOfParamters" id="virusCheckFrequencyName">Virus Check Frequency</p>
+        <div class="slidersAndValues">
+        <input type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('virusCheckFrequency', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="virusCheckFrequency" class="sliderValues">0.4</span>
+        </div>
+
+        <p class="namesOfParamters" id="recoveryChanceName">Recovery Chance</p>
+        <div class="slidersAndValues">
+        <input type="range" min="0.0" max="1.0" value="0.3" step="0.1" class="allTheSliders" oninput="updateValue('recoveryChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="recoveryChance" class="sliderValues">0.3</span>
+        </div>
+
+        <p class="namesOfParamters" id="gainResistanceChanceName">Gain Resistance Chance</p>
+        <div class="slidersAndValues">
+        <input type="range" min="0.0" max="1.0" value="0.5" step="0.1" class="allTheSliders" oninput="updateValue('gainResistanceChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="gainResistanceChance" class="sliderValues">10</span>
+        </div>
+
+    </section>
+
+    <section class="simulationPanel allPanels" id="simulationContainer">
+        <!-- <h2>Simulation</h2> -->
+    </section>
+
+    <section class="rightPanel allPanels" id="graphContainer">
+        <div class="graphSection">
+
+            <div class="graphLegend">
+                <div class="legendRectangles" id="susceptibleRectangle"></div>
+                <label for="legend" class="legendLabels" id="susceptibleLabel">Susceptible</label>
+
+                <div class="legendRectangles" id="resistantRectangle"></div>
+                <label for="legend" class="legendLabels" id="resistantLabel">Resistant</label>
+
+                <div class="legendRectangles" id="infectedRectangle"></div>
+                <label for="legend" class="legendLabels" id="infectedLabel">Infected</label>
+            </div>
+
+            <div class="allGraphs">
+                <div class="graphs" id="pieChartGraph">
+                    <canvas id="pieChart"></canvas>
+                </div>
+
+                <div class="graphs" id="polarAreaChartGraph">
+                    <canvas id="polarAreaChart"></canvas>
+                </div>
+
+                <div class="graphs" id="lineChartGraph">
+                    <canvas id="lineChart"></canvas>
+                </div>
+
+                <div class="graphs" id="barChartGraph">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        function updateValue(sliderName, sliderValue){
+            document.getElementById(sliderName).innerText = sliderValue;
+        }
+        function makeParameterTitleBold(message){
+            parameterName = message.parentElement.previousElementSibling;
+            sliderValue = message.nextElementSibling;
+            sliderValue.style.opacity = '1'
+            parameterName.style.opacity = '1';
+            parameterName.style.textShadow = sliderValue.style.textShadow = '0 0 2px rgba(255, 255, 255, 0.4)';
+            sliderValue.style.transition = parameterName.style.transition = '0.2s';
+
+        }
+        function revertParameterTitle(message){
+            parameterName = message.parentElement.previousElementSibling;
+            sliderValue = message.nextElementSibling;
+            parameterName.style.opacity = '';
+            sliderValue.style.opacity = '';
+            parameterName.style.textShadow = '';
+        }
+        
+        
+    </script>
+    <script src="pieChart.js"></script>
+    <script src="barChart.js"></script>
+    <script src="lineChart.js"></script>
+    <script src="polarAreaChart.js"></script>
+</body>
+</html>
