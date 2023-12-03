@@ -37,5 +37,6 @@ def run_simulation():
 
 
 if __name__ == "__main__":
+   #The web interface will load at http://127.0.0.1:5000
    socketio.run(app, host='127.0.0.1', port=5000)
 
