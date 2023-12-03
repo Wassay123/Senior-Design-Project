@@ -222,3 +222,15 @@ button {
 #result {
     color: white;
 }
+#simulationStep {
+    color: white;
+}
+#infectedCount {
+    color: white;
+}
+#susceptibleCount {
+    color: white;
+}
+#resistantCount {
+    color: white;
+}
