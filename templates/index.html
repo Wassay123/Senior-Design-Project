@@ -5,10 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel= "stylesheet" type= "text/css" href= "../static/styles/style.css">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@2.0.0/dist/chartjs-plugin-deferred.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
     <title>Virus Simulation</title>
 
@@ -79,15 +82,16 @@
 
         <div class="buttonSection">
 
-            <button onclick="getSimulationParameterValues()"> Start Simulation </button>
+            <button onclick="sendSimulationParameters()"> Start Simulation </button>
             <button onclick=""> Stop Simulation </button>
             <button onclick=""> Reset Simulation </button>
+
         </div>
 
-
-
-
-        <p id="result"></p>
+        <p id="simulationStep">simulationStep </p>
+        <p id="infectedCount">infectedCount </p>
+        <p id="susceptibleCount">susceptibleCount </p>
+        <p id="resistantCount">resistantCount </p>
 
     </section>
 
@@ -131,54 +135,7 @@
 
     </section>
 
-    <script>
-        function updateValue(sliderName, sliderValue){
-            document.getElementById(sliderName).innerText = sliderValue;
-        }
-
-        function makeParameterTitleBold(message){
-            parameterName = message.parentElement.previousElementSibling;
-            sliderValue = message.nextElementSibling;
-            sliderValue.style.opacity = '1'
-            parameterName.style.opacity = '1';
-            parameterName.style.textShadow = sliderValue.style.textShadow = '0 0 2px rgba(255, 255, 255, 0.4)';
-            sliderValue.style.transition = parameterName.style.transition = '0.2s';
-        }
-
-        function revertParameterTitle(message){
-            parameterName = message.parentElement.previousElementSibling;
-            sliderValue = message.nextElementSibling;
-            parameterName.style.opacity = '';
-            sliderValue.style.opacity = '';
-            parameterName.style.textShadow = '';
-        }
-
-        //Get All Simulation Parameter Values
-        function getSimulationParameterValues() {
-            const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance"];
-            let values = [];
-
-            for (const name of sliderNames) {
-                const sliderValue = parseFloat(document.getElementById(`${name}Slider`).value);
-                values.push(sliderValue);
-            }
-
-            //Send HTTPS POST Request for Flask App to listen to
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/updateValue", true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    // Update the result on the HTML page
-                    document.getElementById("result").innerHTML = "Result: " + xhr.responseText;
-                }
-            };
-
-            xhr.send(JSON.stringify({values: values}));
-        }
-        
-    </script>
+    <script src="../static/script.js"></script>
     <script src="../static/lineChart.js"> </script>
     <script src="../static/pieChart.js"> </script>
     <script src="../static/barChart.js"> </script>
