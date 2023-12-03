@@ -1,35 +1,41 @@
-from flask import Flask, render_template, Response, request, redirect, jsonify
-from virusOnNetwork.model import State, VirusOnNetwork, number_infected, number_susceptible, number_resistant
+from flask import Flask, render_template, request
+from virusOnNetwork.model import VirusOnNetwork, number_infected, number_susceptible, number_resistant
 from virusOnNetwork.server import get_resistant_susceptible_ratio, network_portrayal
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
-
+socketio = SocketIO(app)
 
 @app.route('/')
 def home():
    return render_template('index.html')
 
-
 @app.route('/updateValue', methods=['POST'])
-def updateValue():
+def run_simulation():
    data = request.get_json()
-   sliderValues = data['values']
+   slider_values = data['values']
 
-   #unpack values from webpage and use them to run the simulation
-   numSteps, numNodes, avgNodeDegree, initialOutbreakSize, virusSpreadRadius, virusSpreadChance, virusCheckFrequency, recoveryChance, gainResistanceChance = sliderValues
-   modelData = runSimulation(numSteps, numNodes, avgNodeDegree, initialOutbreakSize, virusSpreadRadius, virusSpreadChance, virusCheckFrequency, recoveryChance, gainResistanceChance)
+   # Unpack values from webpage and use them to run the simulation
+   num_steps, num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_radius, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance = slider_values
+   model = VirusOnNetwork(num_nodes, avg_node_degree, initial_outbreak_size, virus_spread_radius, virus_spread_chance, virus_check_frequency, recovery_chance, gain_resistance_chance)
 
-   #return slider values to index.html for the webpage to be reupdated
-   return jsonify(modelData)
+   # Run simulation and send results to websocket client (in script.js)
+   for step in range(num_steps):
+      model.step()
 
-#Still in development to return model data
-def runSimulation(numSteps, numNodes, avgNodeDegree, initialOutbreakSize, virusSpreadRadius, virusSpreadChance, virusCheckFrequency, recoveryChance, gainResistanceChance):
-   
-   model = VirusOnNetwork(numNodes, avgNodeDegree, initialOutbreakSize, virusSpreadRadius, virusSpreadChance, virusCheckFrequency, recoveryChance, gainResistanceChance)
-   model.run_model(numSteps)
+      model_data = {
+         "step": step,
+         "infected": number_infected(model),
+         "susceptible": number_susceptible(model),
+         "resistant": number_resistant(model)
+      }
 
-   return "ran model successfully"
+      socketio.emit('simulation_update', model_data)
+
+   #Return an empty response to HTTPS POST (Response is not used anywhere)
+   return '', 204
 
 
-if __name__ == "__main__":  
-    app.run(debug = True) 
+if __name__ == "__main__":
+   socketio.run(app, host='127.0.0.1', port=5000)
+
