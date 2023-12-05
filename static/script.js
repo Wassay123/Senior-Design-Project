@@ -6,6 +6,9 @@ socket.on('simulation_update', function (data) {
     updateSimulationInfo(data);
 });
 
+socket.on('simulation_finished', function(){
+    document.getElementById("startButton").disabled = false
+});
 
 function updateValue(sliderName, sliderValue) {
     document.getElementById(sliderName).innerText = sliderValue;
@@ -30,6 +33,7 @@ function revertParameterTitle(message) {
 
 //Get the Simulation Parameters from each slider and send them to app.py
 function sendSimulationParameters() {
+    document.getElementById("startButton").disabled = true;
     const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance"];
     let values = [];
 

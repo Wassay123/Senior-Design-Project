@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from virusOnNetwork.model import VirusOnNetwork, number_infected, number_susceptible, number_resistant
 from virusOnNetwork.server import get_resistant_susceptible_ratio, network_portrayal
 from flask_socketio import SocketIO
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -29,9 +30,11 @@ def run_simulation():
          "susceptible": number_susceptible(model),
          "resistant": number_resistant(model)
       }
+      time.sleep(1)
 
       socketio.emit('simulation_update', model_data)
 
+   socketio.emit('simulation_finished')
    #Return an empty response to HTTPS POST (Response is not used anywhere)
    return '', 204
 
