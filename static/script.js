@@ -1,14 +1,41 @@
 //Define web socket at local port (Must be changed if running on different URL)
-const socket = io.connect('http://127.0.0.1:5000');
+var socket = io.connect('http://127.0.0.1:5000');
 
 // Update the HTML elements with the simulation model data
 socket.on('simulation_update', function (data) {
     updateSimulationInfo(data);
 });
 
-socket.on('simulation_finished', function(){
-    document.getElementById("startButton").disabled = false
-});
+// Function to start the simulation
+function startSimulation() {
+    var current_step = 0;
+
+    // Get the slider values
+    const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance"];
+    let values = [];
+
+    for (const name of sliderNames) {
+        const sliderValue = parseFloat(document.getElementById(`${name}Slider`).value);
+        values.push(sliderValue);
+    }
+
+    const simulationSpeed = parseFloat(document.getElementById(`simulationSpeedSlider`).value);
+
+    // Send the slider values to the server
+    socket.emit('start_simulation', { values: values });
+
+    // Set up an interval to request updates every second
+    var simulationInterval = setInterval(function () {
+        socket.emit('simulation_update_request', { step: current_step });
+        current_step++;
+
+        if (current_step >= values[0]) {
+            clearInterval(simulationInterval);  // Stop the interval when all steps are simulated
+        }
+    }, Math.floor(1000 / simulationSpeed));
+
+}
+
 
 function updateValue(sliderName, sliderValue) {
     document.getElementById(sliderName).innerText = sliderValue;
@@ -31,30 +58,10 @@ function revertParameterTitle(message) {
     parameterName.style.textShadow = '';
 }
 
-//Get the Simulation Parameters from each slider and send them to app.py
-function sendSimulationParameters() {
-    document.getElementById("startButton").disabled = true;
-    const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance"];
-    let values = [];
-
-    //Get the slider values in an array
-    for (const name of sliderNames) {
-        const sliderValue = parseFloat(document.getElementById(`${name}Slider`).value);
-        values.push(sliderValue);
-    }
-
-    //Send out an HTTPS POST request titled updateValue (triggers the @app.route(/updateValue) code in app.py)
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/updateValue", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify({values: values}));
-}
-
-// Update the HTML elements with the simulation information
+// Function to update the HTML elements with the simulation information
 function updateSimulationInfo(result) {
     document.getElementById("simulationStep").innerHTML = "Step: " + result.step;
     document.getElementById("infectedCount").innerHTML = "Infected: " + result.infected;
     document.getElementById("susceptibleCount").innerHTML = "Susceptible: " + result.susceptible;
     document.getElementById("resistantCount").innerHTML = "Resistant: " + result.resistant;
 }
-
