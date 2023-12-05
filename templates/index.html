@@ -75,10 +75,10 @@
         <span id="gainResistanceChance" class="sliderValues">0.5</span>
         </div>
 
-        <p class="namesOfParamters" id="modelStepDurationName">Step Duration</p>
+        <p class="namesOfParamters" id="simulationSpeedName">Simulation Speed</p>
         <div class="slidersAndValues">
-        <input id="modelStepDurationSlider", type="range" min="0.0" max="5.0" value="1.0" step="1.0" class="allTheSliders" oninput="updateValue('modelStepDuration', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="modelStepDuration" class="sliderValues">1</span>
+        <input id="simulationSpeedSlider", type="range" min="1.0" max="5.0" value="1.0" step="1.0" class="allTheSliders" oninput="updateValue('simulationSpeed', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="simulationSpeed" class="sliderValues">1</span>
         </div>
 
     </section>
@@ -88,7 +88,7 @@
 
         <div class="buttonSection">
 
-            <button onclick="sendSimulationParameters()" id="startButton"> Start Simulation </button>
+            <button onclick="startSimulation()"> Start Simulation </button>
             <button onclick=""> Stop Simulation </button>
             <button onclick=""> Reset Simulation </button>
 
