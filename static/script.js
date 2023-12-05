@@ -2,7 +2,7 @@
 var socket = io.connect('http://127.0.0.1:5000');
 
 // Update the HTML elements with the simulation model data
-socket.on('simulation_update', function (data) {
+socket.on('update_event', function (data) {
     updateSimulationInfo(data);
 });
 
