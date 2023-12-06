@@ -8,6 +8,7 @@ class State(Enum):
     SUSCEPTIBLE = 0
     INFECTED = 1
     RESISTANT = 2
+    DEAD = 3
 
 
 def number_state(model, state):
@@ -25,6 +26,10 @@ def number_susceptible(model):
 def number_resistant(model):
     return number_state(model, State.RESISTANT)
 
+def number_dead(model):
+    return number_state(model, State.DEAD)
+
+
 
 class VirusOnNetwork(mesa.Model):
     """A virus model with some number of agents"""
@@ -38,7 +43,9 @@ class VirusOnNetwork(mesa.Model):
         virus_spread_chance=0.4,
         virus_check_frequency=0.4,
         recovery_chance=0.3,
-        gain_resistance_chance=0.5
+        gain_resistance_chance=0.5,
+        death_rate=0.2
+        
     ):
         self.num_nodes = num_nodes
         prob = avg_node_degree / self.num_nodes
@@ -53,12 +60,14 @@ class VirusOnNetwork(mesa.Model):
         self.recovery_chance = recovery_chance
         self.gain_resistance_chance = gain_resistance_chance
         self.virus_spread_radius = virus_spread_radius
+        self.death_rate = death_rate
 
         self.datacollector = mesa.DataCollector(
             {
                 "Infected": number_infected,
                 "Susceptible": number_susceptible,
                 "Resistant": number_resistant,
+                "Death": number_dead
             }
         )
 
@@ -72,8 +81,8 @@ class VirusOnNetwork(mesa.Model):
                 self.virus_spread_chance,
                 self.virus_check_frequency,
                 self.recovery_chance,
-                self.gain_resistance_chance
-
+                self.gain_resistance_chance,
+                self.death_rate
             )
             self.schedule.add(a)
             # Add the agent to the node
@@ -115,7 +124,8 @@ class VirusAgent(mesa.Agent):
         virus_spread_chance,
         virus_check_frequency,
         recovery_chance,
-        gain_resistance_chance
+        gain_resistance_chance,
+        death_rate
     ):
         super().__init__(unique_id, model)
 
@@ -126,6 +136,7 @@ class VirusAgent(mesa.Agent):
         self.recovery_chance = recovery_chance
         self.gain_resistance_chance = gain_resistance_chance
         self.virus_spread_radius = virus_spread_radius
+        self.death_rate = death_rate
 
     def try_to_infect_neighbors(self):
         #check all agents in radius r from self
@@ -154,9 +165,12 @@ class VirusAgent(mesa.Agent):
             # Success
             self.state = State.SUSCEPTIBLE
             self.try_gain_resistance()
-        else:
-            # Failed
+        elif self.random.random() > self.model.death_rate:
+            # Failed, but survived (did not die)
             self.state = State.INFECTED
+        else:
+            # Failed and died
+            self.state = State.RESISTANT
 
     def try_check_situation(self):
         if (self.random.random() < self.virus_check_frequency) and (
@@ -168,3 +182,36 @@ class VirusAgent(mesa.Agent):
         if self.state is State.INFECTED:
             self.try_to_infect_neighbors()
         self.try_check_situation()
+
+
+if __name__ == "__main__":
+    num_nodes = 50
+    avg_node_degree = 5
+    initial_outbreak_size = 1
+    virus_spread_radius = 1
+    virus_spread_chance = 0.4
+    virus_check_frequency = 0.4
+    recovery_chance = 0.3
+    gain_resistance_chance = 0.5
+    death_rate = 0.1  # Set your desired death rate
+
+    # Create an instance of the model
+    model = VirusOnNetwork(
+        num_nodes=num_nodes,
+        avg_node_degree=avg_node_degree,
+        initial_outbreak_size=initial_outbreak_size,
+        virus_spread_radius=virus_spread_radius,
+        virus_spread_chance=virus_spread_chance,
+        virus_check_frequency=virus_check_frequency,
+        recovery_chance=recovery_chance,
+        gain_resistance_chance=gain_resistance_chance,
+        death_rate=death_rate
+    )
+
+    # Run the model for a certain number of steps
+    num_steps = 50
+    model.run_model(num_steps)
+
+    # Collect and print data
+    data = model.datacollector.get_agent_vars_dataframe()
+    print(data)
