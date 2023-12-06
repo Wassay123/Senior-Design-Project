@@ -1,5 +1,7 @@
 //Define web socket at local port (Must be changed if running on different URL)
 var socket = io.connect('http://127.0.0.1:5000');
+var simulationInterval; //global variable for simulationInterval
+var simulationState = "idle";  //Possible simulationStates: "idle", "sending"
 
 // Update the HTML elements with the simulation model data
 socket.on('update_event', function (data) {
@@ -9,10 +11,16 @@ socket.on('update_event', function (data) {
 
 // Function to start the simulation
 function startSimulation() {
-    var current_step = 0;
+    // If the simulation is already running, then do nothing
+    if (simulationState == "sending") {
+        return;
+    }
 
-    // Get the slider values
-    const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance"];
+    var current_step = 1;
+    var startSimulationButton = document.getElementById("startSimulationButton");
+    startSimulationButton.disabled = true;
+
+    const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance", "deathRate"];
     let values = [];
 
     for (const name of sliderNames) {
@@ -21,22 +29,68 @@ function startSimulation() {
     }
 
     const simulationSpeed = parseFloat(document.getElementById(`simulationSpeedSlider`).value);
+    socket.emit('start_simulation', {values: values});
 
-    // Send the slider values to the server
-    socket.emit('start_simulation', { values: values });
+    // Define an interval function which will be repeated every Math.floor(1000 / simulationSpeed)) milliseconds
+    simulationInterval = setInterval(function () {
+        // If the State is idle then the Stop button was pressed and the simulation should end
+        if (simulationState == "idle") {
+            stopSimulation();
+            return;
+        }
 
-    // Set up an interval to request updates every second
-    var simulationInterval = setInterval(function () {
-        socket.emit('simulation_update_request', { step: current_step });
+        socket.emit('simulation_update_request', {step: current_step});
         current_step++;
 
-        if (current_step >= values[0]) {
-            clearInterval(simulationInterval);  // Stop the interval when all steps are simulated
+        // Stop the simulation when all steps are simulated (values[0] holds the total numSteps for the model to take)
+        if (current_step > values[0]) {
+            stopSimulation();
         }
+
     }, Math.floor(1000 / simulationSpeed));
 
+    simulationState = "sending";
 }
 
+
+// Function to reset the simulation (Remove webpage info of the current simulation and set slider values to their default)
+function resetSimulation() {
+    if (simulationState == "sending"){
+        return;
+    }
+
+    const sliderNames = ["numSteps", "numAgents", "avgNodeDegree", "initialOutbreak", "virusSpreadRadius", "virusSpreadChance", "virusCheckFrequency", "recoveryChance", "gainResistanceChance", "simulationSpeed", "deathRate"];
+    const defaultValues = [10, 10, 3, 1, 1, 0.4, 0.4, 0.3, 0.5, 3, 0.2];
+
+    for (let i = 0; i < sliderNames.length; i++) {
+        const sliderName = sliderNames[i];
+        const slider = document.getElementById(`${sliderName}Slider`);
+        slider.value = defaultValues[i];
+        updateValue(sliderName, defaultValues[i]);
+    }
+
+    document.getElementById("simulationStep").innerHTML = "Step: ";
+    document.getElementById("infectedCount").innerHTML = "Infected: ";
+    document.getElementById("susceptibleCount").innerHTML = "Susceptible: ";
+    document.getElementById("resistantCount").innerHTML = "Resistant: ";
+    document.getElementById("deathCount").innerHTML = "Dead: ";
+}
+
+
+// Function to stop the simulation
+function stopSimulation() {
+    // If the simulation is not running return
+    if (simulationState == "idle") {
+        return;
+    }
+
+    // Else Reset the Interval function and set the simulation to idle
+    var startSimulationButton = document.getElementById("startSimulationButton");
+    startSimulationButton.disabled = false;
+
+    clearInterval(simulationInterval);
+    simulationState = "idle";
+}
 
 function updateValue(sliderName, sliderValue) {
     document.getElementById(sliderName).innerText = sliderValue;
@@ -65,7 +119,9 @@ function updateSimulationInfo(result) {
     document.getElementById("infectedCount").innerHTML = "Infected: " + result.infected;
     document.getElementById("susceptibleCount").innerHTML = "Susceptible: " + result.susceptible;
     document.getElementById("resistantCount").innerHTML = "Resistant: " + result.resistant;
+    document.getElementById("deathCount").innerHTML = "Dead: " + result.dead;
 }
+
 function updateSimulationCharts(result){
     infectedCount = result.infected
     susceptibleCount = result.susceptible
@@ -83,9 +139,12 @@ function updateSimulationCharts(result){
     barChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount];
     barChart.update();
 }
+
 function updateChartsBySliders(sliderValue){
+    const totalAgents = document.getElementById(`numAgentsSlider`).value;
+
     infectedCount = sliderValue
-    susceptibleCount = 10-sliderValue
+    susceptibleCount = totalAgents - sliderValue
     resistantCount = 0
 
     pieChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount];
