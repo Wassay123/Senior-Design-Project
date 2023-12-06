@@ -234,6 +234,9 @@ button {
 #resistantCount {
     color: white;
 }
+#deathCount {
+    color: white;
+}
 .simulationStats{
     height: 100%;
     width: 23%;
@@ -285,12 +288,15 @@ button {
     margin-bottom: 2%;
     outline: none;    
 }
-#startButton{
+#startSimulationButton{
     box-shadow: 0 0 16px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
 }
-#stopButton{
+#stopSimulationButton{
     box-shadow: 0 0 16px rgba(255, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
 }
-#resetButton{
+#resetSimulationButton{
     box-shadow: 0 0 16px rgba(0, 0, 255, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
 }
