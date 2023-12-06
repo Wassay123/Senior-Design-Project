@@ -77,8 +77,14 @@
 
         <p class="namesOfParamters" id="simulationSpeedName">Simulation Speed</p>
         <div class="slidersAndValues">
-        <input id="simulationSpeedSlider", type="range" min="1.0" max="5.0" value="1.0" step="1.0" class="allTheSliders" oninput="updateValue('simulationSpeed', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="simulationSpeed" class="sliderValues">1</span>
+        <input id="simulationSpeedSlider", type="range" min="1.0" max="5.0" value="3.0" step="1.0" class="allTheSliders" oninput="updateValue('simulationSpeed', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="simulationSpeed" class="sliderValues">3</span>
+        </div>
+
+        <p class="namesOfParamters" id="deathRateName">Death Rate</p>
+        <div class="slidersAndValues">
+        <input id="deathRateSlider", type="range" min="0.0" max="1.0" value="0.2" step="0.1" class="allTheSliders" oninput="updateValue('deathRate', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="deathRate" class="sliderValues">0.2</span>
         </div>
 
     </section>
@@ -87,16 +93,17 @@
         <!-- <h2>Simulation</h2> -->
 
         <div class="buttonSection" id="simulationButtonContainer">
-            <button class="simulationButtons" id="startButton" onclick="startSimulation()"> Start Simulation </button>
-            <button class="simulationButtons" id="stopButton" onclick=""> Stop Simulation </button>
-            <button class="simulationButtons" id="resetButton" onclick=""> Reset Simulation </button>
+            <button class="simulationButtons" id="startSimulationButton" onclick="startSimulation()"> Start Simulation </button>
+            <button class="simulationButtons" id="stopSimulationButton" onclick="stopSimulation()"> Stop Simulation </button>
+            <button class="simulationButtons" id="resetSimulationButton" onclick="resetSimulation()"> Reset Simulation </button>
         </div>
 
         <div id="simulationStatsContainer">
-            <p class="simulationStats" id="simulationStep">simulationStep </p>
-            <p class="simulationStats" id="infectedCount">infectedCount </p>
-            <p class="simulationStats" id="susceptibleCount">susceptibleCount </p>
-            <p class="simulationStats" id="resistantCount">resistantCount </p>
+            <p class="simulationStats" id="simulationStep">Step: </p>
+            <p class="simulationStats" id="infectedCount">Infected: </p>
+            <p class="simulationStats" id="susceptibleCount">Susceptible: </p>
+            <p class="simulationStats" id="resistantCount">Resistant: </p>
+            <p class="simulationStats" id="deathCount">Dead: </p>
         </div>
 
     </section>
