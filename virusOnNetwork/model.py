@@ -170,7 +170,7 @@ class VirusAgent(mesa.Agent):
             self.state = State.INFECTED
         else:
             # Failed and died
-            self.state = State.RESISTANT
+            self.state = State.DEAD
 
     def try_check_situation(self):
         if (self.random.random() < self.virus_check_frequency) and (
@@ -212,6 +212,7 @@ if __name__ == "__main__":
     num_steps = 50
     model.run_model(num_steps)
 
-    # Collect and print data
-    data = model.datacollector.get_agent_vars_dataframe()
-    print(data)
+    print("Susceptible : {}".format(number_susceptible(model)))
+    print("Infected : {}".format(number_infected(model)))
+    print("Resistant : {}".format(number_resistant(model)))
+    print("Dead : {}".format(number_dead(model)))
