@@ -1,6 +1,14 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from virusOnNetwork.model import VirusOnNetwork, number_infected, number_susceptible, number_resistant, number_dead
+from virusOnNetwork.server import network_portrayal
+import matplotlib.pyplot as plt
+import contextily as cx
+import networkx as nx
+import geopandas
+import geodatasets
+import pointpats
+
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -36,12 +44,38 @@ def handle_simulation_update_request(data):
    if model is not None:
       simulate_step(step)
 
-
+   
 def simulate_step(step):
    global model
-
+   
+   df = geopandas.read_file(geodatasets.get_path("nybb"))
+   df_wm = df.to_crs(epsg=3857)
+   
+   #generates random points within a multipolygon
+   points = pointpats.random.poisson(df_wm.unary_union, size= model.num_nodes)
+   
    if model is not None:
       model.step()
+      
+      fig1, ax = plt.subplots(figsize=(10, 10))
+      df_wm.plot(ax=ax, alpha=0.5, edgecolor="k")
+      cx.add_basemap(ax)
+      
+      network = network_portrayal(model.G)
+      
+      g = nx.Graph()
+      
+      for idx, node_data in enumerate(network["nodes"]):
+            g.add_node(idx, size=node_data["size"], color=node_data["color"], tooltip=node_data["tooltip"])
+            
+      node_colors = [g.nodes[node]["color"] for node in g.nodes]
+      node_sizes = [g.nodes[node]["size"] * 20 for node in g.nodes]
+      
+      nx.draw_networkx_nodes(g, points, node_size=node_sizes, node_color=node_colors)
+      plt.tight_layout()
+      plt.savefig('static/nyc_map.png')
+      plt.close(fig1)
+      
 
       model_data = {
          "step": step,
@@ -50,9 +84,11 @@ def simulate_step(step):
          "resistant": number_resistant(model),
          "dead": number_dead(model)
       }
+      
 
       #Send model_data for the current step to the update_event web socket (front end will read it to update the website)
       socketio.emit('update_event', model_data)
+      
 
 
 if __name__ == "__main__":
