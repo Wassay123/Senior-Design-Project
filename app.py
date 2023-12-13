@@ -35,7 +35,7 @@ def initialize_simulation(values):
 
    global model
    # Unpack values from the webpage and use them to initialize the simulation
-   num_nodes, initial_outbreak_size, virus_spread_radius, virus_spread_chance, recovery_chance, death_rate = values
+   num_steps, num_nodes, initial_outbreak_size, virus_spread_radius, virus_spread_chance, recovery_chance, death_rate = values
 
    model = VirusOnNetwork(num_nodes, 3, initial_outbreak_size, virus_spread_radius, virus_spread_chance, 0.4, recovery_chance, 0.5, death_rate)
 
