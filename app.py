@@ -3,10 +3,8 @@ from flask_socketio import SocketIO
 
 from virusOnNetwork.model import VirusOnNetwork, number_infected, number_susceptible, number_resistant, number_dead
 from virusOnNetwork.server import network_portrayal
-
 import matplotlib.pyplot as plt
-import contextily as cx
-import networkx as nx
+import pandas as pd
 import geopandas
 import geodatasets
 import pointpats
@@ -19,7 +17,7 @@ socketio = SocketIO(app)
 
 model = None  # Initialize the model as a global variable
 df_wm = geopandas.read_file(geodatasets.get_path("nybb")).to_crs(epsg=3857)
-
+points = None
 
 # Compile HTML website
 @app.route('/')
@@ -37,7 +35,8 @@ def initialize_simulation(values):
 
    global model
    # Unpack values from the webpage and use them to initialize the simulation
-   num_steps, num_nodes, initial_outbreak_size, virus_spread_radius, virus_spread_chance, recovery_chance, death_rate = values
+   num_nodes, initial_outbreak_size, virus_spread_radius, virus_spread_chance, recovery_chance, death_rate = values
+
    model = VirusOnNetwork(num_nodes, 3, initial_outbreak_size, virus_spread_radius, virus_spread_chance, 0.4, recovery_chance, 0.5, death_rate)
 
 
@@ -49,9 +48,12 @@ def handle_start_simulation(data):
    Args:
       data (dict): Dictionary containing simulation parameters.
    """
-
+   global points
+   
    slider_values = data.get('values', [])
    initialize_simulation(slider_values)
+   points = pd.DataFrame(pointpats.random.poisson(df_wm.unary_union, size=model.num_nodes))
+
 
 
 @socketio.on('simulation_update_request')
@@ -80,9 +82,6 @@ def generate_visual(path):
    # Load the basemap image
    basemap_img = plt.imread('static/nyc_basemap.png')
 
-   # Generate random points within a multipolygon using the algorithm
-   points = pointpats.random.poisson(df_wm.unary_union, size=model.num_nodes)
-
    fig1, ax = plt.subplots(figsize=(10, 10))
 
    # Plot the basemap image
@@ -93,18 +92,17 @@ def generate_visual(path):
 
    network = network_portrayal(model.G)
 
-   g = nx.Graph()
-
-   for idx, node_data in enumerate(network["nodes"]):
-      g.add_node(idx, size=node_data["size"], color=node_data["color"], tooltip=node_data["tooltip"])
-
-   node_colors = [g.nodes[node]["color"] for node in g.nodes]
-   node_sizes = [g.nodes[node]["size"] * 20 for node in g.nodes]
+   node_colors = []
+        
+   for idx, node in enumerate(network["nodes"]):
+      node_colors.append(node["color"])
 
    # Overlay the generated points on top of the basemap image
-   ax.scatter(points[:, 0], points[:, 1], color=node_colors, marker='o', s=node_sizes, alpha=0.7)
-
-   plt.tight_layout()
+   points.plot(ax = ax, x = 0, y = 1, kind = 'scatter', s = 60, color = node_colors)
+   plt.gca().set_axis_off()
+   plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
+                hspace = 0, wspace = 0)
+   plt.margins(0,0)
    plt.savefig(path)
    plt.close(fig1)
 
