@@ -175,7 +175,10 @@ button {
     background-color: rgba(255, 0, 0, 0.2);
     border: 2px solid rgba(255, 0, 0, 0.8);
 }
-
+#deadRectangle{
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 1);
+}
 #susceptibleLabel{
     height: 100%;
     width: 19%;
