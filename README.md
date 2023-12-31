@@ -1,4 +1,4 @@
-# README: Flask Web App with Mesa Simulation
+# Flask Web App with Mesa Simulation
 
 ## Project Overview
 
