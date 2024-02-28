@@ -30,7 +30,8 @@ function startSimulation() {
     }
 
     const simulationSpeed = parseFloat(document.getElementById(`simulationSpeedSlider`).value);
-    socket.emit('start_simulation', {values: values});
+    const densityRange = document.getElementById("densityRangeDropdown").value;  // Get selected density range
+    socket.emit('start_simulation', {values: values, density_range: densityRange});  // Pass density_range to server
 
     // Define an interval function which will be repeated every Math.floor(1000 / simulationSpeed)) milliseconds
     simulationInterval = setInterval(function () {

@@ -24,6 +24,14 @@ button {
     justify-content: center;
     opacity: 0.6;
 }
+#densityRangeTitle {
+    display: flex;
+    justify-content: center;
+    margin-top: 7%;
+    margin-bottom: 4%;
+    opacity: 0.6;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+} 
 .slidersAndValues{
     display: flex;
     justify-content: center;

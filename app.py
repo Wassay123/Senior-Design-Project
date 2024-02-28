@@ -5,9 +5,8 @@ from virusOnNetwork.model import VirusOnNetwork, number_infected, number_suscept
 from virusOnNetwork.server import network_portrayal
 import matplotlib.pyplot as plt
 import pandas as pd
-import geopandas
-import geodatasets
-import pointpats
+import geopandas as gpd
+from pointpats import random
 
 import matplotlib
 matplotlib.use('Agg')
@@ -15,8 +14,9 @@ matplotlib.use('Agg')
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-model = None  # Initialize the model as a global variable
-df_wm = geopandas.read_file(geodatasets.get_path("nybb")).to_crs(epsg=3857)
+model = None
+zip_code_areas = gpd.read_file('zip_code_040114.geojson')
+df = None
 points = None
 
 # Compile HTML website
@@ -36,8 +36,9 @@ def initialize_simulation(values):
    global model
    # Unpack values from the webpage and use them to initialize the simulation
    num_steps, num_nodes, initial_outbreak_size, virus_spread_radius, virus_spread_chance, recovery_chance, death_rate = values
-
    model = VirusOnNetwork(num_nodes, 3, initial_outbreak_size, virus_spread_radius, virus_spread_chance, 0.4, recovery_chance, 0.5, death_rate)
+
+
 
 
 # Web Socket that reads model parameters from the front end
@@ -48,11 +49,24 @@ def handle_start_simulation(data):
    Args:
       data (dict): Dictionary containing simulation parameters.
    """
-   global points
+   global points, df
    
    slider_values = data.get('values', [])
+   density_range = data.get('density_range', '')
    initialize_simulation(slider_values)
-   points = pd.DataFrame(pointpats.random.poisson(df_wm.unary_union, size=model.num_nodes))
+   
+   min_density, max_density = map(float, density_range.split(','))
+   
+   population_densities = pd.read_csv('nyc_zip_borough_neighborhoods_pop.csv')
+   
+   population_densities['zip'] = population_densities['zip'].astype(str)
+   
+   merged_data = zip_code_areas.merge(population_densities, how='inner', left_on='ZIPCODE', right_on='zip')
+   
+   df = merged_data[(merged_data['density'] >= min_density) & 
+                            (merged_data['density'] <= max_density)]
+
+   points = pd.DataFrame(random.poisson(df.unary_union, size=model.num_nodes))
 
 
 
@@ -77,18 +91,9 @@ def generate_visual(path):
    Args:
       path (str): Path to save the visualization image.
    """
-   global df_wm, model
-
-   # Load the basemap image
-   basemap_img = plt.imread('static/nyc_basemap.png')
+   global df, model
 
    fig1, ax = plt.subplots(figsize=(10, 10))
-
-   # Plot the basemap image
-   ax.imshow(basemap_img, extent=(df_wm.total_bounds[0], df_wm.total_bounds[2], df_wm.total_bounds[1], df_wm.total_bounds[3]))
-
-   # Turn off the axis frame
-   ax.axis('off')
 
    network = network_portrayal(model.G)
 
@@ -96,14 +101,13 @@ def generate_visual(path):
         
    for idx, node in enumerate(network["nodes"]):
       node_colors.append(node["color"])
+      
+   zip_code_areas.plot(ax=ax, color='lightblue', edgecolor='black')
+   df.plot(ax=ax, color='steelblue', edgecolor='black')
 
-   # Overlay the generated points on top of the basemap image
-   points.plot(ax = ax, x = 0, y = 1, kind = 'scatter', s = 60, color = node_colors)
-   plt.gca().set_axis_off()
-   plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
-                hspace = 0, wspace = 0)
-   plt.margins(0,0)
-   plt.savefig(path)
+   points.plot(ax = ax, x = 0, y = 1, kind = 'scatter', s = 50, color = node_colors)
+   ax.axis('off')
+   plt.savefig(path, bbox_inches = 'tight')
    plt.close(fig1)
 
 
