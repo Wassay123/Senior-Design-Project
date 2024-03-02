@@ -21,70 +21,67 @@
     <section class="parameterPanel allPanels" id="leftPanelContainer">
         <h1 id="leftPanelTitle">Simulation Parameters</h1>
             
-        <p class="namesOfParamters" id="numStepsName">Number of Steps</p>
+        <p class="namesOfParameters" id="slider1Name">Number of Steps</p>
         <div class="slidersAndValues">
-        <input id="numStepsSlider", type="range" min="1" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('numSteps', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="numSteps" class="sliderValues">10</span>
+        <input id="slider1", type="range" min="1" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('slider1Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider1Value" class="sliderValues">10</span>
         </div>  
 
-        <p class="namesOfParamters" id="numAgentsName">Number of Agents</p>
+        <p class="namesOfParameters" id="slider2Name">Number of Agents</p>
         <div class="slidersAndValues">
-        <input id="numAgentsSlider", type="range" min="10" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('numAgents', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="numAgents" class="sliderValues">10</span>
-        </div>
-            
-        <!-- <p class="namesOfParamters" id="avgNodeDegreeName">Average Node Degree</p>
-        <div class="slidersAndValues">
-        <input id="avgNodeDegreeSlider", type="range" min="3" max="8" value="3" step="1" class="allTheSliders" oninput="updateValue('avgNodeDegree', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="avgNodeDegree" class="sliderValues">3</span>
-        </div> -->
-
-        <p class="namesOfParamters" id="initialOutbreakName">Initial Outbreak</p>
-        <div class="slidersAndValues">
-        <input id="initialOutbreakSlider", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('initialOutbreak', this.value); updateChartsBySliders(this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="initialOutbreak" class="sliderValues">1</span>
+        <input id="slider2", type="range" min="10" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('slider2Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider2Value" class="sliderValues">10</span>
         </div>
 
-        <p class="namesOfParamters" id="virusSpreadRadiusName">Virus Spread Radius</p>
+        <p class="namesOfParameters" id="slider3Name">Initial Outbreak</p>
         <div class="slidersAndValues">
-        <input id="virusSpreadRadiusSlider", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('virusSpreadRadius', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="virusSpreadRadius" class="sliderValues">1</span>
+        <input id="slider3", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider3Value', this.value); updateChartsBySliders(this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider3Value" class="sliderValues">1</span>
         </div>
 
-        <p class="namesOfParamters" id="virusSpreadChanceName">Virus Spread Chance</p>
+        <p class="namesOfParameters" id="slider4Name">Virus Spread Radius</p>
         <div class="slidersAndValues">
-        <input id="virusSpreadChanceSlider", type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('virusSpreadChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="virusSpreadChance" class="sliderValues">0.4</span>
+        <input id="slider4", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider4Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider4Value" class="sliderValues">1</span>
         </div>
 
-        <!-- <p class="namesOfParamters" id="virusCheckFrequencyName">Virus Check Frequency</p>
+        <p class="namesOfParameters" id="slider5Name">Virus Spread Chance</p>
         <div class="slidersAndValues">
-        <input id="virusCheckFrequencySlider", type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('virusCheckFrequency', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="virusCheckFrequency" class="sliderValues">0.4</span>
-        </div> -->
-
-        <p class="namesOfParamters" id="recoveryChanceName">Recovery Chance</p>
-        <div class="slidersAndValues">
-        <input id="recoveryChanceSlider", type="range" min="0.0" max="1.0" value="0.3" step="0.1" class="allTheSliders" oninput="updateValue('recoveryChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="recoveryChance" class="sliderValues">0.3</span>
+        <input id="slider5", type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('slider5Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider5Value" class="sliderValues">0.4</span>
         </div>
 
-        <!-- <p class="namesOfParamters" id="gainResistanceChanceName">Gain Resistance Chance</p>
+        <p class="namesOfParameters" id="slider6Name">Recovery Chance</p>
         <div class="slidersAndValues">
-        <input id="gainResistanceChanceSlider", type="range" min="0.0" max="1.0" value="0.5" step="0.1" class="allTheSliders" oninput="updateValue('gainResistanceChance', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="gainResistanceChance" class="sliderValues">0.5</span>
-        </div> -->
-
-        <p class="namesOfParamters" id="simulationSpeedName">Simulation Speed</p>
-        <div class="slidersAndValues">
-        <input id="simulationSpeedSlider", type="range" min="1.0" max="3.0" value="3.0" step="1.0" class="allTheSliders" oninput="updateValue('simulationSpeed', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="simulationSpeed" class="sliderValues">3</span>
+        <input id="slider6", type="range" min="0.0" max="1.0" value="0.3" step="0.1" class="allTheSliders" oninput="updateValue('slider6Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider6Value" class="sliderValues">0.3</span>
         </div>
 
-        <p class="namesOfParamters" id="deathRateName">Death Rate</p>
+        <p class="namesOfParameters" id="slider7Name">Death Rate</p>
         <div class="slidersAndValues">
-        <input id="deathRateSlider", type="range" min="0.0" max="1.0" value="0.2" step="0.1" class="allTheSliders" oninput="updateValue('deathRate', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
-        <span id="deathRate" class="sliderValues">0.2</span>
+        <input id="slider7", type="range" min="0.0" max="1.0" value="0.2" step="0.1" class="allTheSliders" oninput="updateValue('slider7Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider7Value" class="sliderValues">0.2</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider8Name">Simulation Speed</p>
+        <div class="slidersAndValues">
+        <input id="slider8", type="range" min="1.0" max="3.0" value="3.0" step="1.0" class="allTheSliders" oninput="updateValue('slider8Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider8Value" class="sliderValues">3</span>
+        </div>
+
+        <p class="namesOfParameters" id="densityRangeTitle">Population Density(mi²)</p>
+        <div class="slidersAndValues">
+            <select id="densityRangeDropdown">
+                <option value="0,10000">0 - 10,000</option>
+                <option value="10001,25000">10,001 - 20,000</option>
+                <option value="25001,50000">20,001 - 50,000</option>
+                <option value="50001,inf">50,001 ≥ </option>
+            </select>
+        </div>
+
+        <div id="modelSelection">
+            <button class="simulationButtons" id="virusModelBtn" onclick="selectModel(this)">Virus Model</button>
+            <button class="simulationButtons" id="tornadoModelBtn" onclick="selectModel(this)">Tornado Model</button>
         </div>
 
     </section>
@@ -100,14 +97,14 @@
 
         <div id="simulationStatsContainer">
             <p class="simulationStats" id="simulationStep">Step: </p>
-            <p class="simulationStats" id="infectedCount">Infected: </p>
-            <p class="simulationStats" id="susceptibleCount">Susceptible: </p>
-            <p class="simulationStats" id="resistantCount">Resistant: </p>
-            <p class="simulationStats" id="deathCount">Dead: </p>
+            <p class="simulationStats" id="statistic1">Infected: </p>
+            <p class="simulationStats" id="statistic2">Susceptible: </p>
+            <p class="simulationStats" id="statistic3">Resistant: </p>
+            <p class="simulationStats" id="statistic4">Dead: </p>
         </div>
 
         <div id="mapContainer">
-            <img src="../static/nyc_basemap.png" alt="New York Map" id="simulationMap">
+            <img src="../static/images/nyc_basemap_empty.png" alt="New York Map" id="simulationMap">
         </div>
 
     </section>
@@ -115,7 +112,7 @@
     <section class="rightPanel allPanels" id="graphContainer">
 
         <div class="graphSection">
-
+            
             <div class="graphLegend">
 
                 <div class="legendRectangles" id="susceptibleRectangle"></div>
@@ -155,11 +152,11 @@
 
     </section>
 
-    <script src="../static/script.js"></script>
-    <script src="../static/lineChart.js"> </script>
-    <script src="../static/pieChart.js"> </script>
-    <script src="../static/barChart.js"> </script>
-    <script src="../static/polarAreaChart.js"> </script>
+    <script src="../static/scripts/simulation.js"></script>
+    <script src="../static/scripts/lineChart.js"> </script>
+    <script src="../static/scripts/pieChart.js"> </script>
+    <script src="../static/scripts/barChart.js"> </script>
+    <script src="../static/scripts/polarAreaChart.js"> </script>
 
 
 </body>
