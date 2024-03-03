@@ -21,7 +21,7 @@ socket.on('update_event', function (data) {
 
     } else if (modelType == "tornado"){
         updateSimulationInfo(data);
-        //add more here for visualization
+        //add more here for visualization through other function
     } 
 });
 
@@ -290,19 +290,19 @@ function selectTornadoModel() {
     updateSliderRange("slider2", 1, 100, 10, 1);
 
     updateSliderText("slider3Name", "Initial Safe Size");
-    updateSliderRange("slider3", 1, 10, 1, 1);
+    updateSliderRange("slider3", 1, 10, 3, 1);
 
     updateSliderText("slider4Name", "Tornado Move Chance");
-    updateSliderRange("slider4", 0, 1, 0.5, 0.1);
+    updateSliderRange("slider4", 0.0, 1, 0.3, 0.1);
 
     updateSliderText("slider5Name", "Tornado Radius");
     updateSliderRange("slider5", 1, 5, 1, 1);
 
     updateSliderText("slider6Name", "Tornado Intensity");
-    updateSliderRange("slider6", 0, 1, 0.5, 0.1);
+    updateSliderRange("slider6", 0.0, 1, 0.5, 0.1);
 
     updateSliderText("slider7Name", "Death Rate");
-    updateSliderRange("slider7", 0, 1, 0.1, 1);
+    updateSliderRange("slider7", 0.0, 1, 0.5, 0.1);
 
     updateSliderText("slider8Name", "Simulation Speed");
     updateSliderRange("slider8", 1, 3, 3, 1);

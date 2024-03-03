@@ -58,7 +58,7 @@ def initialize_simulation(values):
       
       # Define some more abstract model variables here
       avg_node_degree = 5
-      injury_base_chance = 0.3
+      injury_base_chance = 0.5
 
       model = TornadoDisaster(num_nodes, 
                               avg_node_degree, 

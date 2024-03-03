@@ -2,29 +2,24 @@ import math
 import mesa
 import networkx as nx
 from enum import Enum
-
+import random
 
 class State(Enum):
     SAFE = 0
     INJURED = 1
     DEAD = 2
 
-
 def number_state(model, state):
     return sum(1 for a in model.grid.get_all_cell_contents() if a.state is state)
-
 
 def number_injured(model):
     return number_state(model, State.INJURED)
 
-
 def number_safe(model):
     return number_state(model, State.SAFE)
 
-
 def number_killed(model):
     return number_state(model, State.DEAD)
-
 
 class TornadoDisaster(mesa.Model):
     """A tornado disaster model with some number of agents"""
@@ -62,12 +57,8 @@ class TornadoDisaster(mesa.Model):
 
         # Create agents
         for i, node in enumerate(self.G.nodes()):
-            if i < initial_safe_size:
-                agent = PersonAgent(i, self, State.SAFE, self.injury_base_chance, self.death_chance)
-
-            else:
-                agent = PersonAgent(i, self, State.INJURED, self.injury_base_chance, self.death_chance)
-
+            initial_state = random.choice([State.SAFE, State.INJURED])  # Randomize initial state
+            agent = PersonAgent(i, self, initial_state, self.injury_base_chance, self.death_chance)
             self.schedule.add(agent)
             self.grid.place_agent(agent, node)
 
@@ -91,50 +82,33 @@ class TornadoDisaster(mesa.Model):
 class PersonAgent(mesa.Agent):
     def __init__(self, unique_id, model, initial_state, injury_base_chance, death_chance):
         super().__init__(unique_id, model)
-
         self.state = initial_state
         self.injury_base_chance = injury_base_chance
         self.death_chance = death_chance
-
 
     def calculate_injury_chance(self):
         tornado_position = self.model.tornado.position
         tornado_intensity = self.model.tornado.intensity
 
-        # Check if tornado position is valid
         if tornado_position in self.model.G.nodes():
-
-            # Get neighborhood within tornado radius
             neighbors_within_radius = self.model.grid.get_neighborhood(self.pos, radius=self.model.tornado.radius)
-            
-            # Calculate distance to tornado
-            distance_to_tornado = (
-                0
-                if tornado_position in neighbors_within_radius
-                else float("inf")
-            )
-
-            # Adjust injury chance based on distance and tornado intensity
+            distance_to_tornado = 0 if tornado_position in neighbors_within_radius else float("inf")
             adjusted_chance = (self.injury_base_chance * (1 / (1 + math.exp(-tornado_intensity * (distance_to_tornado - 1)))))
-
             return min(1.0, adjusted_chance)
-        
         else:
-
-            return 0.0  # Tornado position is not valid
-
+            return 0.0
 
     def try_injury(self):
-        injury_chance = self.calculate_injury_chance()
+        # Add randomness to injury chance
+        injury_chance = self.calculate_injury_chance() * random.uniform(0.8, 1.2)
         if self.random.random() < injury_chance:
             self.state = State.INJURED
             self.try_death()
 
-
     def try_death(self):
-        if self.random.random() < self.death_chance:
+        # Add randomness to death chance
+        if self.random.random() < self.death_chance * random.uniform(0.8, 1.2):
             self.state = State.DEAD
-
 
     def step(self):
         if self.state == State.SAFE and self.model.tornado.position == self.pos:
@@ -148,7 +122,6 @@ class Tornado:
         self.radius = radius
         self.intensity = intensity
         self.position = self.model.random.choice(list(self.model.G.nodes()))
-
 
     def move(self):
         if self.model.random.random() < self.move_chance:
@@ -164,13 +137,13 @@ class Tornado:
 
 
 if __name__ == "__main__":
-    num_nodes = 100
+    num_nodes = 10
     avg_node_degree = 5
-    initial_safe_size = 40
+    initial_safe_size = 3
     tornado_move_chance = 0.3
     tornado_radius = 1
-    tornado_intensity = 0.5  # Adjust tornado intensity here
-    injury_base_chance = 0.1
+    tornado_intensity = 0.5
+    injury_base_chance = 0.5
     death_chance = 0.5
 
     # Create an instance of the model
