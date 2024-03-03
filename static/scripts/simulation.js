@@ -6,10 +6,11 @@ var simulationState = "idle";  // Possible simulationStates: "idle", "sending"
 var simulationInterval;
 var modelType; // values can be "virus" or "tornado"
 
-// on initialization, select virus model as current modelType
+// on initialization, select virus model as current modelType and update map to current population density
 document.addEventListener("DOMContentLoaded", function() {
     var virusModelBtn = document.getElementById("virusModelBtn");
     selectModel(virusModelBtn);
+    switchDensityImage();
 });
 
 // Update the HTML elements with the simulation model data
