@@ -347,3 +347,27 @@ function selectVirusModel() {
     document.getElementById("statistic4").style.display = "flex";
     document.getElementById("statistic4").innerText = "Dead";
 }
+//Funtion to change image based on density dropdown choice
+function switchDensityImage(){
+    var dropdown = document.getElementById("densityRangeDropdown");
+    var selectedValue = dropdown.value;
+    var imgElement = document.getElementById("simulationMap");
+    var imagePath = '';
+
+    switch (selectedValue) {
+        case "0,10000":
+            imagePath = "../static/images/nyc_basemap_density_0_10000.png";
+            break;
+        case "10001,25000":
+            imagePath = "../static/images/nyc_basemap_density_10001_25000.png";
+            break;
+        case "25001,50000":
+            imagePath = "../static/images/nyc_basemap_density_25001_50000.png";
+            break;
+        case "50001,inf":
+            imagePath = "../static/images/nyc_basemap_density_50001_inf.png";
+            break;
+
+    }
+    imgElement.src = imagePath;
+}
