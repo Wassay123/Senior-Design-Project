@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel= "stylesheet" type= "text/css" href= "../static/styles/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@2.0.0/dist/chartjs-plugin-deferred.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <title>Virus Simulation</title>
+
+</head>
+
+<body>
+    <section class="parameterPanel allPanels" id="leftPanelContainer">
+        <h1 id="leftPanelTitle">Simulation Parameters</h1>
+            
+        <p class="namesOfParameters" id="slider1Name">Number of Steps</p>
+        <div class="slidersAndValues">
+        <input id="slider1", type="range" min="1" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('slider1Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider1Value" class="sliderValues">10</span>
+        </div>  
+
+        <p class="namesOfParameters" id="slider2Name">Number of Agents</p>
+        <div class="slidersAndValues">
+        <input id="slider2", type="range" min="10" max="100" value="10" step="1" class="allTheSliders" oninput="updateValue('slider2Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider2Value" class="sliderValues">10</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider3Name">Initial Outbreak</p>
+        <div class="slidersAndValues">
+        <input id="slider3", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider3Value', this.value); updateChartsBySliders(this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider3Value" class="sliderValues">1</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider4Name">Virus Spread Radius</p>
+        <div class="slidersAndValues">
+        <input id="slider4", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider4Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider4Value" class="sliderValues">1</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider5Name">Virus Spread Chance</p>
+        <div class="slidersAndValues">
+        <input id="slider5", type="range" min="0.0" max="1.0" value="0.4" step="0.1" class="allTheSliders" oninput="updateValue('slider5Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider5Value" class="sliderValues">0.4</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider6Name">Recovery Chance</p>
+        <div class="slidersAndValues">
+        <input id="slider6", type="range" min="0.0" max="1.0" value="0.3" step="0.1" class="allTheSliders" oninput="updateValue('slider6Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider6Value" class="sliderValues">0.3</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider7Name">Death Rate</p>
+        <div class="slidersAndValues">
+        <input id="slider7", type="range" min="0.0" max="1.0" value="0.2" step="0.1" class="allTheSliders" oninput="updateValue('slider7Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider7Value" class="sliderValues">0.2</span>
+        </div>
+
+        <p class="namesOfParameters" id="slider8Name">Simulation Speed</p>
+        <div class="slidersAndValues">
+        <input id="slider8", type="range" min="1.0" max="3.0" value="3.0" step="1.0" class="allTheSliders" oninput="updateValue('slider8Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <span id="slider8Value" class="sliderValues">3</span>
+        </div>
+
+        <p class="namesOfParameters" id="densityRangeTitle">Population Density(mi²)</p>
+        <div class="slidersAndValues">
+            <select id="densityRangeDropdown" onchange="switchDensityImage()">
+                <option value="0,10000">0 - 10,000</option>
+                <option value="10001,25000">10,001 - 20,000</option>
+                <option value="25001,50000">20,001 - 50,000</option>
+                <option value="50001,inf">50,001 ≥ </option>
+            </select>
+        </div>
+
+        <div id="modelSelection">
+            <button class="simulationButtons" id="virusModelBtn" onclick="selectModel(this)">Virus Model</button>
+            <button class="simulationButtons" id="tornadoModelBtn" onclick="selectModel(this)">Tornado Model</button>
+        </div>
+
+    </section>
+
+    <section class="simulationPanel allPanels" id="simulationContainer">
+        <!-- <h2>Simulation</h2> -->
+
+        <div class="buttonSection" id="simulationButtonContainer">
+            <button class="simulationButtons" id="startSimulationButton" onclick="startSimulation()"> Start Simulation </button>
+            <button class="simulationButtons" id="stopSimulationButton" onclick="stopSimulation()"> Stop Simulation </button>
+            <button class="simulationButtons" id="resetSimulationButton" onclick="resetSimulation()"> Reset Simulation </button>
+        </div>
+
+        <div id="simulationStatsContainer">
+            <p class="simulationStats" id="simulationStep">Step: </p>
+            <p class="simulationStats" id="statistic1">Infected: </p>
+            <p class="simulationStats" id="statistic2">Susceptible: </p>
+            <p class="simulationStats" id="statistic3">Resistant: </p>
+            <p class="simulationStats" id="statistic4">Dead: </p>
+        </div>
+
+        <div id="mapContainer">
+            <div id="visualsContainer">
+                <div id="ball"></div>
+
+                <div class="city" id="city0">0</div>
+                <div class="person" id="person0_tl"></div>
+                <div class="person" id="person0_tr"></div>
+                <div class="person" id="person0_bl"></div>
+                <div class="person" id="person0_br"></div>
+                
+                <div class="city" id="city1">1</div>
+                <div class="person" id="person1_tl"></div>
+                <div class="person" id="person1_tr"></div>
+                <div class="person" id="person1_bl"></div>
+                <div class="person" id="person1_br"></div>
+                
+                <div class="city" id="city2">2</div>
+                <div class="person" id="person2_tl"></div>
+                <div class="person" id="person2_tr"></div>
+                <div class="person" id="person2_bl"></div>
+                <div class="person" id="person2_br"></div>
+                
+                <div class="city" id="city3">3</div>
+                <div class="person" id="person3_tl"></div>
+                <div class="person" id="person3_tr"></div>
+                <div class="person" id="person3_bl"></div>
+                <div class="person" id="person3_br"></div>
+                
+                <div class="city" id="city4">4</div>
+                <div class="person" id="person4_tl"></div>
+                <div class="person" id="person4_tr"></div>
+                <div class="person" id="person4_bl"></div>
+                <div class="person" id="person4_br"></div>
+                
+                <div class="city" id="city5">5</div>
+                <div class="person" id="person5_tl"></div>
+                <div class="person" id="person5_tr"></div>
+                <div class="person" id="person5_bl"></div>
+                <div class="person" id="person5_br"></div>
+                
+                <div class="city" id="city6">6</div>
+                <div class="person" id="person6_tl"></div>
+                <div class="person" id="person6_tr"></div>
+                <div class="person" id="person6_bl"></div>
+                <div class="person" id="person6_br"></div>
+                
+                <svg id="path" width="100%" height="100%">
+                    <path id="pathLine" fill="none" stroke="black" stroke-width="2" />
+                </svg>
+            </div>
+
+            <img src="../static/images/nyc_basemap_empty.png" alt="New York Map" id="simulationMap">
+        </div>
+
+    </section>
+
+    <section class="rightPanel allPanels" id="graphContainer">
+
+        <div class="graphSection">
+            
+            <div class="graphLegend">
+
+                <div class="legendRectangles" id="susceptibleRectangle"></div>
+                <label for="legend" class="legendLabels" id="susceptibleLabel">Susceptible</label>
+
+                <div class="legendRectangles" id="resistantRectangle"></div>
+                <label for="legend" class="legendLabels" id="resistantLabel">Resistant</label>
+
+                <div class="legendRectangles" id="infectedRectangle"></div>
+                <label for="legend" class="legendLabels" id="infectedLabel">Infected</label>
+
+                <div class="legendRectangles" id="deadRectangle"></div>
+                <label for="legend" class="legendLabels" id="deadLabel">Dead</label>
+            </div>
+
+            <div class="allGraphs">
+
+                <div class="graphs" id="lineChartGraph">
+                    <canvas id="lineChart"></canvas>
+                </div>
+
+                <div class="graphs" id="pieChartGraph">
+                    <canvas id="pieChart"></canvas>
+                </div>
+
+                <div class="graphs" id="polarAreaChartGraph">
+                    <canvas id="polarAreaChart"></canvas>
+                </div>
+
+                <div class="graphs" id="barChartGraph">
+                    <canvas id="barChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <script src="../static/scripts/simulation.js"></script>
+    <script src="../static/scripts/lineChart.js"> </script>
+    <script src="../static/scripts/pieChart.js"> </script>
+    <script src="../static/scripts/barChart.js"> </script>
+    <script src="../static/scripts/polarAreaChart.js"> </script>
+
+
+</body>
+</html>

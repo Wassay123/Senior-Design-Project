@@ -1,0 +1,410 @@
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    display: flex;
+    background: rgba(40, 40, 103, 0.8);
+}
+button {
+    display: block;
+
+}
+#ball {
+    width: 25px;
+    height: 25px;
+    background-color: red;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-50%, -50%); /* Center the ball both horizontally and vertically */
+    border-radius: 50%;
+}
+
+.city {
+    width: 30px;
+    height: 30px;
+    background-color: blue;
+    position: absolute; /* Position the city absolutely within the map container */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+}
+
+.person {
+    width: 15px;
+    height: 15px;
+    background-color: green;
+    border-radius: 50%;
+    display: flex;
+    font-size: 14px;
+    position: absolute;
+}
+
+/* Define fixed positions for the cities */
+#city0 { top: 82%; left: 15%; }
+#city1 { top: 70%; left: 20%; }
+#city2 { top: 75%; left: 30%; }
+#city3 { top: 65%; left: 50%; }
+#city4 { top: 50%; left: 50%; }
+#city5 { top: 20%; left: 60%; }
+#city6 { top: 45%; left: 70%; }
+
+#person0_tl { top: calc(82% - 15px); left: calc(15% - 15px);}
+#person0_tr { top: calc(82% - 15px); left: calc(15% + 25px);}
+#person0_bl { top: calc(82% + 25px); left: calc(15% - 15px);}
+#person0_br { top: calc(82% + 25px); left: calc(15% + 25px);}
+
+/* For City 1 */
+#person1_tl { top: calc(70% - 15px); left: calc(20% - 15px);}
+#person1_tr { top: calc(70% - 15px); left: calc(20% + 25px);}
+#person1_bl { top: calc(70% + 25px); left: calc(20% - 15px);}
+#person1_br { top: calc(70% + 25px); left: calc(20% + 25px);}
+
+/* For City 2 */
+#person2_tl { top: calc(75% - 15px); left: calc(30% - 15px);}
+#person2_tr { top: calc(75% - 15px); left: calc(30% + 25px);}
+#person2_bl { top: calc(75% + 25px); left: calc(30% - 15px);}
+#person2_br { top: calc(75% + 25px); left: calc(30% + 25px);}
+
+/* For City 3 */
+#person3_tl { top: calc(65% - 15px); left: calc(50% - 15px);}
+#person3_tr { top: calc(65% - 15px); left: calc(50% + 30px);}
+#person3_bl { top: calc(65% + 25px); left: calc(50% - 15px);}
+#person3_br { top: calc(65% + 25px); left: calc(50% + 30px);}
+
+/* For City 4 */
+#person4_tl { top: calc(50% - 15px); left: calc(50% - 15px);}
+#person4_tr { top: calc(50% - 15px); left: calc(50% + 25px);}
+#person4_bl { top: calc(50% + 25px); left: calc(50% - 15px);}
+#person4_br { top: calc(50% + 25px); left: calc(50% + 25px);}
+
+/* For City 5 */
+#person5_tl { top: calc(20% - 15px); left: calc(60% - 15px);}
+#person5_tr { top: calc(20% - 15px); left: calc(60% + 25px);}
+#person5_bl { top: calc(20% + 25px); left: calc(60% - 15px);}
+#person5_br { top: calc(20% + 25px); left: calc(60% + 25px);}
+
+/* For City 6 */
+#person6_tl { top: calc(45% - 15px); left: calc(70% - 15px);}
+#person6_tr { top: calc(45% - 15px); left: calc(70% + 25px);}
+#person6_bl { top: calc(45% + 25px); left: calc(70% - 15px);}
+#person6_br { top: calc(45% + 25px); left: calc(70% + 25px);}
+
+#path {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+#pathLine {
+    fill: none;
+    stroke: black;
+    stroke-width: 2;
+}
+
+.result{
+    color: white;
+}
+.sliderValues {
+    width: 2%;
+    margin-left: 5%;
+    display: flex;
+    justify-content: center;
+    opacity: 0.6;
+}
+.slidersAndValues{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.namesOfParameters{
+    display: flex;
+    justify-content: center;
+    margin-top: 7%;
+    margin-bottom: 4%;
+    opacity: 0.6;
+    text-shadow: 0 0 2px rgba(255,255, 255, 0.8);
+}
+#leftPanelTitle{
+    padding-top: 2%;
+    display: flex;
+    justify-content: center;
+    color: grey;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+.parameterPanel{
+    height: 99vh;
+    width: 24vw;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+.allTheSliders {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80%;
+    height: 8px;
+    border-radius: 1vh;
+    background: rgba(128, 128, 128, 0.2);
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
+    outline: none;
+    margin: 0.5% 0;
+    opacity: 0.9;
+    transition: background-color 0.6s, opacity 0.2s;
+}
+.allTheSliders::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 2vw;
+    height: 3vh;
+    background: rgb(82, 31, 103);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    border-radius: 50%;
+    opacity: 1;
+    transition: background 0.2s, opacity 0.2s;
+}
+.allTheSliders::-moz-range-thumb {
+    width: 2vw;
+    height: 3vh;
+    background: rgb(82, 31, 103);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    border-radius: 50%;
+    opacity: 1;
+    transition: background 0.2s, opacity 0.2s;
+  }
+.allTheSliders:hover::-webkit-slider-thumb{
+    background: rgb(98, 37, 122);
+    opacity: 1;
+}
+.allTheSliders:hover{
+    background: rgba(128, 128, 128, 0.4);
+}
+.simulationPanel{
+    height: 99vh;
+    width: 49vw;
+}
+.allPanels{
+    background: #251c35;
+    border-radius: 8%;
+    margin: 0.5vh 0.5vw;
+    box-shadow: 0 0 1rem rgb(0, 0, 0);
+}
+.rightPanel{
+    height: 99vh;
+    width: 24vw;
+    display: flex;
+    align-items: start;
+}
+.graphSection{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;  
+}
+.graphs{
+    background: #251c35;
+}
+.allGraphs{
+    height: 93%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 2%;
+}
+.graphLegend{
+    height: 7%;
+    width: 95%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+}
+.legendLabels{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    text-shadow: 0 0 2px rgba(255,255, 255, 0.8);
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+.legendRectangles{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10%;
+    height: 50%;
+    width: 9%;
+}
+#susceptibleRectangle{
+    background-color: rgba(144, 238, 144, 0.2);
+    border: 2px solid rgba(144, 238, 144, 0.8);
+    margin-left: 2%;
+}
+#resistantRectangle{
+    background-color: rgba(128, 128, 128, 0.2);
+    border: 2px solid rgba(128, 128, 128, 0.8);
+}
+#infectedRectangle{
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 2px solid rgba(255, 0, 0, 0.8);
+}
+#deadRectangle{
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 1);
+}
+#susceptibleLabel{
+    height: 100%;
+    width: 19%;
+    margin-right: 3%;
+    margin-left: 1%;
+}
+#resistantLabel{
+    height: 100%;
+    width: 15%;
+    margin-right: 3%;
+    margin-left: 1%;
+}
+#infectedLabel{
+    height: 100%;
+    width: 14%;
+    margin-right: 3%;
+    margin-left: 1%;
+}
+#pieChartGraph{
+    height: 25%;
+    width: 45%;
+    margin-top: 3%;
+    margin-left: 40%;
+    
+}
+#barChartGraph{
+    height: 25%;
+    width: 39%;
+    margin-top: 2%;
+    margin-left: 40%;
+}
+#lineChartGraph{
+    height: 25%;
+    width: 40%;
+    margin-top: 3%;
+    margin-right: 40%;
+}
+#polarAreaChartGraph{
+    height: 30%;
+    width: 45%;
+    margin-top: 2%;
+    margin-right: 40%;
+}
+#result {
+    color: white;
+}
+.simulationStats{
+    height: 100%;
+    width: 23%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(72, 25, 91);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    margin-left: 1%;
+    margin-right: 1%;
+    text-shadow: 0 0 6px rgba(255,255, 255, 0.5);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    color: white;
+}
+#simulationStatsContainer{
+    display: flex;
+    justify-content: center;
+    width: 98%;
+    height: 5%;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+.simulationButtons{
+    height: 100%;
+    width: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(82, 31, 103);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    margin-left: 0.5%;
+    margin-right: 0.5%;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    text-shadow: 0 0 10px rgb(47, 5, 63);
+}
+#simulationButtonContainer{
+    height: 5%;
+    width: 92%;
+    display: flex;
+    justify-content: center;
+    margin-top: 2%;
+    margin-left: 4%;
+    margin-right: 4%;
+    margin-bottom: 2%;
+    outline: none;    
+}
+#startSimulationButton{
+    box-shadow: 0 0 16px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
+}
+#stopSimulationButton{
+    box-shadow: 0 0 16px rgba(255, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
+}
+#resetSimulationButton{
+    box-shadow: 0 0 16px rgba(0, 0, 255, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
+    color: white;
+}
+.simulationButtons.selected {
+    background-color: rgb(40, 40, 103); 
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(0, 0, 255, 0.5);
+}
+#mapContainer {
+    position: relative; /* Set the map container to relative positioning */
+    height: 80%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 3%;
+}
+#simulationMap{
+    height: 100%;
+    width: 95%;
+    border-radius: 8%;
+}
+#modelSelection {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    margin-bottom: 1rem; 
+    color: white;
+}
+#densityRangeTitle {
+    display: flex;
+    justify-content: center;
+    margin-top: 7%;
+    margin-bottom: 4%;
+    opacity: 0.6;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+} 
