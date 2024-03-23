@@ -21,6 +21,9 @@ def number_safe(model):
 def number_killed(model):
     return number_state(model, State.DEAD)
 
+def number_of_days(model):
+    return model.first_casualty_step #returns number of days until the first casuality occurs
+
 class TornadoDisaster(mesa.Model):
     """A tornado disaster model with some number of agents"""
 
@@ -46,12 +49,14 @@ class TornadoDisaster(mesa.Model):
         self.tornado_intensity = tornado_intensity
         self.injury_base_chance = injury_base_chance
         self.death_chance = death_chance
+        self.first_casualty_step = 0 
 
         self.datacollector = mesa.DataCollector(
             {
                 "Safe": number_safe,
                 "Injured": number_injured,
                 "Dead": number_killed,
+                "Days until first casuality": number_of_days,
             }
         )
 
@@ -73,6 +78,8 @@ class TornadoDisaster(mesa.Model):
         self.tornado.move()
         self.datacollector.collect(self)
 
+        if self.first_casualty_step == 0 and (number_killed(self)) > 0:
+            self.first_casualty_step = self.schedule.steps
 
     def run_model(self, n):
         for i in range(n):
