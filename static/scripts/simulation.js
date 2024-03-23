@@ -96,7 +96,7 @@ function resetSimulation() {
         const defaultValues = [10, 10, 1, 1, 0.4, 0.3, 0.2, 3];
 
         // reset meta data about the simulation
-        document.getElementById("simulationStep").innerHTML = "Step: ";
+        document.getElementById("simulationStep").innerHTML = "Days: ";
         document.getElementById("statistic1").innerHTML = "Infected: ";
         document.getElementById("statistic2").innerHTML = "Susceptible: ";
         document.getElementById("statistic3").innerHTML = "Resistant: ";
@@ -113,9 +113,6 @@ function resetSimulation() {
         pieChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
         pieChart.update();
     
-        polarAreaChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        polarAreaChart.update();
-    
         lineChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
         lineChart.update();
     
@@ -128,10 +125,11 @@ function resetSimulation() {
         const defaultValues = [10, 10, 1, 0.5, 1, 0.5, 0.1, 3];
 
         // reset meta data about the simulation
-        document.getElementById("simulationStep").innerHTML = "Step: ";
+        document.getElementById("simulationStep").innerHTML = "Days: ";
         document.getElementById("statistic1").innerHTML = "Safe: ";
         document.getElementById("statistic2").innerHTML = "Injured: ";
         document.getElementById("statistic3").innerHTML = "Dead: ";
+        document.getElementById("statistic4").innerHTML = "Days until first casuality: ";
 
         // Add chart functionality here
     }
@@ -183,13 +181,13 @@ function revertParameterTitle(message) {
 
 // Function to update the HTML elements with the simulation information
 function updateSimulationInfo(result) {
-    document.getElementById("simulationStep").innerHTML = "Step: " + result.step;
+    document.getElementById("simulationStep").innerHTML = "Days: " + result.step;
     
     if (modelType == "tornado") {
         document.getElementById("statistic1").innerHTML = "Safe: " + result.safe;
         document.getElementById("statistic2").innerHTML = "Injured: " + result.injured;
         document.getElementById("statistic3").innerHTML = "Dead: " + result.dead;
-        document.getElementById("statistic4").style.display = "none";
+        document.getElementById("statistic4").innerHTML = "Days until first casuality:" + result.days_til_cas;
 
     } else if (modelType == "virus") {
         document.getElementById("statistic1").innerHTML = "Infected: " + result.infected;
@@ -218,9 +216,6 @@ function updateVirusSimulationCharts(result){
     pieChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
     pieChart.update();
 
-    polarAreaChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
-    polarAreaChart.update();
-
     lineChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
     lineChart.update();
 
@@ -235,9 +230,6 @@ function updateTornadoSimulationCharts(result){
 
     pieChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
     pieChart.update();
-
-    polarAreaChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
-    polarAreaChart.update();
 
     lineChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
     lineChart.update();
@@ -311,7 +303,7 @@ function selectTornadoModel() {
     document.getElementById("statistic1").innerText = "Safe";
     document.getElementById("statistic2").innerText = "Injured";
     document.getElementById("statistic3").innerText = "Dead";
-    document.getElementById("statistic4").style.display = "none";
+    document.getElementById("statistic4").innerText = "Days until first casuality:";
 
     document.getElementById("susceptibleLabel").innerText = "Safe";
     document.getElementById("resistantLabel").innerText = "Injured";
