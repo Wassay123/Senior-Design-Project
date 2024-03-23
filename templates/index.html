@@ -95,14 +95,6 @@
             <button class="simulationButtons" id="resetSimulationButton" onclick="resetSimulation()"> Reset Simulation </button>
         </div>
 
-        <div id="simulationStatsContainer">
-            <p class="simulationStats" id="simulationStep">Step: </p>
-            <p class="simulationStats" id="statistic1">Infected: </p>
-            <p class="simulationStats" id="statistic2">Susceptible: </p>
-            <p class="simulationStats" id="statistic3">Resistant: </p>
-            <p class="simulationStats" id="statistic4">Dead: </p>
-        </div>
-
         <div id="mapContainer">
             <div id="visualsContainer">
                 <div id="ball"></div>
@@ -163,6 +155,18 @@
 
         <div class="graphSection">
             
+            <div id="simulationStatsContainer">
+                <div class="statsRow">
+                    <p class="simulationStats" id="simulationStep">Days: </p>
+                    <p class="simulationStats" id="statistic1">Infected: </p>
+                    <p class="simulationStats" id="statistic2">Susceptible: </p>
+                </div>
+                <div class="statsRow">
+                    <p class="simulationStats" id="statistic3">Resistant: </p>
+                    <p class="simulationStats" id="statistic4">Dead: </p>
+                </div>
+            </div>
+
             <div class="graphLegend">
 
                 <div class="legendRectangles" id="susceptibleRectangle"></div>
@@ -180,22 +184,19 @@
 
             <div class="allGraphs">
 
-                <div class="graphs" id="lineChartGraph">
-                    <canvas id="lineChart"></canvas>
-                </div>
-
                 <div class="graphs" id="pieChartGraph">
                     <canvas id="pieChart"></canvas>
                 </div>
 
-                <div class="graphs" id="polarAreaChartGraph">
-                    <canvas id="polarAreaChart"></canvas>
+                <div class="rowGraphs">
+                    <div class="graphs" id="lineChartGraph">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+            
+                    <div class="graphs" id="barChartGraph">
+                        <canvas id="barChart"></canvas>
+                    </div>
                 </div>
-
-                <div class="graphs" id="barChartGraph">
-                    <canvas id="barChart"></canvas>
-                </div>
-
             </div>
 
         </div>
@@ -206,8 +207,6 @@
     <script src="../static/scripts/lineChart.js"> </script>
     <script src="../static/scripts/pieChart.js"> </script>
     <script src="../static/scripts/barChart.js"> </script>
-    <script src="../static/scripts/polarAreaChart.js"> </script>
-
 
 </body>
 </html>
