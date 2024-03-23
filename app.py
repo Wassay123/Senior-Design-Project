@@ -6,7 +6,7 @@ import pandas as pd
 import geopandas as gpd
 from pointpats import random
 
-from models.tornadoModel.model import TornadoDisaster, number_injured, number_safe, number_killed
+from models.tornadoModel.model import TornadoDisaster, number_injured, number_safe, number_killed, number_of_days
 from models.virusModel.model import VirusOnNetwork, number_infected, number_susceptible, number_resistant, number_dead
 from models.virusModel.server import network_portrayal
 
@@ -153,7 +153,8 @@ def simulate_step(step, path):
             "step": step,
             "injured": number_injured(model),
             "safe": number_safe(model),
-            "dead": number_killed(model)
+            "dead": number_killed(model), 
+            "days_til_cas": number_of_days(model)
          }
 
       # Send model_data for the current step to the update_event web socket (front end will read it to update the website)
