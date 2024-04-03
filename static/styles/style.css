@@ -405,11 +405,19 @@ button {
     margin-bottom: 1rem; 
     color: white;
 }
-#densityRangeTitle {
+#map {
+    position: relative; /* Set the map container to relative positioning */
+    height: 80%;
+    width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 7%;
-    margin-bottom: 4%;
-    opacity: 0.6;
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
-} 
+    margin-top: 3%;
+}
+#modelSelection {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    margin-bottom: 1rem; 
+    color: white;
+}
+
