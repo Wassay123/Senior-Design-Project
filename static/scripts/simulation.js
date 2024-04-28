@@ -2,10 +2,10 @@
 var socket = io.connect("http://127.0.0.1:5000");
 
 // Define global variables
-var simulationState = "idle";  // Possible simulationStates: "idle", "sending"
-var mapState = "idle"; // Possible simulationStates: "idle", "populated"
-var simulationInterval;
+var virusSimulationInterval;
 var modelType; // values can be "virus" or "tornado"
+var simulationState = "idle";  // Possible simulationStates: "idle", "sending"
+var mapState = "idle"; // Possible simulationStates: "idle", "populated" 
 
 // on initialization, select virus model as current modelType
 document.addEventListener("DOMContentLoaded", function() {
@@ -13,36 +13,36 @@ document.addEventListener("DOMContentLoaded", function() {
     selectModel(virusModelBtn);
 });
 
-
-// Update the HTML elements with the simulation model data
+// Update the HTML elements with the virus model data
 socket.on("update_event", function (data) {
     if (modelType == "virus"){
-        updateSimulationInfo(data);
+        updateStatisticsWebSocket(data);
         updateVirusSimulationCharts(data);
         updateVirusVisuals(data);
-    } 
-    else if (modelType == "tornado"){
-        updateSimulationInfo(data);
-        updateTornadoSimulationCharts(data);
-    } 
-    
+    }     
 });
 
+// Code to place agents according to the Virus Model Needs (Where some agents are initialized as infected)
 function placeVirusAgents(){
+    clearMap();
+
     const numAgents = parseFloat(document.getElementById("slider2").value);
     const numInfected = parseFloat(document.getElementById("slider3").value);
     const numSusceptible = numAgents - numInfected;
 
     placeAgents(numSusceptible, "green");
     placeAgents(numInfected, "red");
-
     mapState = "populated";
 }
 
+// Code to place agents according to the Tornado Model Needs (Where all agents are initialized as healthy)
 function placeTornadoAgents(){
-    const numAgents = parseFloat(document.getElementById("slider2").value);
-    placeAgents(numAgents, "green");
+    clearMap();
+    defineTornadoAndCities();
 
+    const numAgents = parseFloat(document.getElementById("slider2").value);
+
+    placeAgents(numAgents, "green");
     mapState = "populated";
 }
 
@@ -52,85 +52,98 @@ function startSimulation() {
         return;
     }
 
-    var current_step = 1;
+    // Enter Virus WorkFlow (Communication w/ Python Mesa Model via WebSockets)
+    if (modelType == "virus") {
 
-    // Disable start button to prevent users spamming the button
-    var startSimulationButton = document.getElementById("startSimulationButton");
-    startSimulationButton.disabled = true;
-    startSimulationButton.style.color = "grey";
+        // If there are no agents on the map, place them. then send the agent locations through web socket for Mesa Model Initialization
+        if (mapState == "idle"){
+            placeVirusAgents();
+        }
+        mapState = "populated";
+        socket.emit('simulation_points', {agent_points: markerData});
 
-    let values = []; 
-    const sliders = document.querySelectorAll(".simulationSliders");
+        // Disable start button, to make sure users dont spam Start button
+        disableStartButton();
 
-    // Loop through all sliders and get their values
-    sliders.forEach(slider => {
-        const sliderValue = parseFloat(slider.value);
-        values.push(sliderValue);
-    });
+        // Get Slider Values and send them to Mesa Simulation to Initialize Mesa Model w/ proper parameters
+        let values = []; 
+        const sliders = document.querySelectorAll(".simulationSliders");
 
-    if (modelType == "virus" && mapState == "idle"){
-        placeVirusAgents();
+        sliders.forEach(slider => {
+            const sliderValue = parseFloat(slider.value);
+            values.push(sliderValue);
+        });
+
+        socket.emit("start_simulation", {slider_values: values});
+
+        // Get Simulation High Level parameters like number of steps and simulation speed
+        var current_step = 1;
+        const maxSteps = parseFloat(document.getElementById("slider1").value);
+        const simulationSpeed = parseFloat(document.getElementById("slider8").value);
+
+
+        // Function to communicate w. Mesa Model
+        virusSimulationInterval = setInterval(function () {
+            // If the State is idle then the Stop button was pressed and the simulation should end
+            if (simulationState == "idle") {
+                stopSimulation();
+                return;
+            }
+
+            // New step, tell the Mesa model to run another step
+            socket.emit("simulation_step", {step: current_step});
+            current_step++;
+
+            // Stop the simulation when all steps are simulated (values[1] holds the total numSteps for the model to take)
+            if (current_step > maxSteps) {
+                stopSimulation();
+            }
+
+        }, Math.floor(2500 / simulationSpeed));
+
+        simulationState = "sending";
     }
 
-    if (modelType == "tornado" && mapState == "idle"){
-        placeTornadoAgents();
+    // Enter Tornado Model Workflow
+    if (modelType == "tornado") {
+        simulation_started = true;
+
+        // If there are no agents on the map, place them. Don't need to use WebSockets as Tornado Model is handled in JS Frontend
+        if (mapState == "idle"){
+            placeTornadoAgents();
+        }
+
+        // Get Slider Values for Tornado Model, this model uses only a select number of the sliders
+        let values = []; 
+        const sliderIDs = ["slider2", "slider4", "slider5", "slider6", "slider7", "slider8"];
+
+        sliderIDs.forEach(sliderID => {
+            const sliderElement = document.getElementById(sliderID);
+            const sliderValue = parseFloat(sliderElement.value);
+            values.push(sliderValue);
+        });
+
+        // Run the Tornado Model with the appropriate parameters
+        runTornadoSimulation(values); 
     }
-
-    socket.emit('simulation_points', {agent_points: markerData});
-
-    mapState = "populated";
-
-    const maxSteps = parseFloat(document.getElementById("slider1").value);
-    const simulationSpeed = parseFloat(document.getElementById("slider8").value);
-
-    socket.emit("start_simulation", {slider_values: values});
-
-    // Define an interval function which will be repeated every Math.floor(5000 / simulationSpeed)) milliseconds
-    simulationInterval = setInterval(function () {
-        // If the State is idle then the Stop button was pressed and the simulation should end
-        if (simulationState == "idle") {
-            stopSimulation();
-            return;
-        }
-
-        socket.emit("simulation_step", {step: current_step});
-        current_step++;
-
-        // Stop the simulation when all steps are simulated (values[1] holds the total numSteps for the model to take)
-        if (current_step > maxSteps) {
-            stopSimulation();
-        }
-
-    }, Math.floor(2500 / simulationSpeed));
-
-    simulationState = "sending";
 }
-
-
 
 // Function to reset the simulation (Remove webpage info of the current simulation and set slider values to their default)
 function resetSimulation() {
+    // If Simulation is already in action, Users should press Stop Simulation. Not Reset Simulation
     if (simulationState == "sending"){
         return;
     }
-    let defaultValues;
 
+    // Remove all markers and lines from the map
     resetMap();
     resetMarkers();
 
+    // Reset Slider values to Virus Model Defaults if the Virus Model is in use
     if (modelType == "virus"){
         resetVirusSliders();
         placeVirusAgents();
-    }
 
-    if (modelType == "tornado"){
-        resetTornadoSliders();
-        placeTornadoAgents();
-        defineTornadoAndCities();
-    }
-
-
-    if (modelType == "virus") {
         // reset meta data about the simulation
         document.getElementById("simulationStep").innerHTML = "Steps: ";
         document.getElementById("statistic1").innerHTML = "Infected: ";
@@ -138,137 +151,53 @@ function resetSimulation() {
         document.getElementById("statistic3").innerHTML = "Resistant: ";
         document.getElementById("statistic4").innerHTML = "Dead: ";
 
-        // code to initialize the charts
-        const numInfected = document.getElementById(`slider3`).value;
-
-        statistic1 = numInfected;
-        statistic2 = 10 - statistic1;
-        statistic3 = 0;
-        deadCount = 0;
-    
-        pieChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        pieChart.update();
-    
-        lineChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        lineChart.update();
-    
-        barChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        barChart.update();
+        // code to initialize the charts to the Virus Model (Where an agent is initially infected)
+        setDefaultVirusGraphs();
     }
 
-    if (modelType == "tornado") {
+    // Reset Slider values to Tornado Model Defaults if the Tornado Model is in use
+    if (modelType == "tornado"){
+        resetTornadoSliders();
+        placeTornadoAgents();
+
         // reset meta data about the simulation
         document.getElementById("simulationStep").innerHTML = "Steps: ";
         document.getElementById("statistic1").innerHTML = "Safe: ";
         document.getElementById("statistic2").innerHTML = "Injured: ";
         document.getElementById("statistic3").innerHTML = "Dead: ";
 
-        // code to initialize the charts
-        const numAgents = document.getElementById(`slider2`).value;
-
-        statistic1 = 0;
-        statistic2 = numAgents;
-        statistic3 = 0;
-        deadCount = 0;
-    
-        pieChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        pieChart.update();
-    
-        lineChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        lineChart.update();
-    
-        barChart.data.datasets[0].data = [statistic1, statistic2, statistic3, deadCount];
-        barChart.update();
+        // code to initialize the charts to the Tornado Model (Where all agents are initially healthy)
+        setDefaultTornadoGraphs();
     }
-
 }
 
-function updateValue(sliderName, sliderValue) {
-    document.getElementById(sliderName).innerText = sliderValue;
-    mapState = "idle";
-}
-
-function makeParameterTitleBold(message) {
-    parameterName = message.parentElement.previousElementSibling;
-    sliderValue = message.nextElementSibling;
-    sliderValue.style.opacity = '1'
-    parameterName.style.opacity = '1';
-    parameterName.style.textShadow = sliderValue.style.textShadow = '0 0 2px rgba(255, 255, 255, 0.4)';
-    sliderValue.style.transition = parameterName.style.transition = '0.2s';
-}
-
-function revertParameterTitle(message) {
-    parameterName = message.parentElement.previousElementSibling;
-    sliderValue = message.nextElementSibling;
-    parameterName.style.opacity = '';
-    sliderValue.style.opacity = '';
-    parameterName.style.textShadow = '';
-}
-
-
-function resetTornadoSliders(){
-    // default slider values
-    const defaultValues = [10, 10, 1, 0.5, 1, 0.5, 0.1, 3];
-
-    const sliders = document.querySelectorAll(".allTheSliders");
-
-    sliders.forEach((slider, i) => {
-        slider.value = defaultValues[i];
-
-        const valueDisplayId = `slider${i + 1}Value`;
-        const valueDisplay = document.getElementById(valueDisplayId);
-        if (valueDisplay) {
-            valueDisplay.innerHTML = defaultValues[i].toString();
-        }
-    });
-}
-
-function resetVirusSliders(){
-    // default slider values
-    const defaultValues = [10, 10, 1, 1, 0.4, 0.3, 0.2, 3];
-
-    const sliders = document.querySelectorAll(".allTheSliders");
-
-    sliders.forEach((slider, i) => {
-        slider.value = defaultValues[i];
-
-        const valueDisplayId = `slider${i + 1}Value`;
-        const valueDisplay = document.getElementById(valueDisplayId);
-        if (valueDisplay) {
-            valueDisplay.innerHTML = defaultValues[i].toString();
-        }
-    });
-}
 // Function to stop the simulation
 function stopSimulation() {
-    // If the simulation is not running return
+    // If the simulation is not running return as theres nothing to stop
     if (simulationState == "idle") {
         return;
     }
 
-    // Else Reset the Interval function and set the simulation to idle
-    var startSimulationButton = document.getElementById("startSimulationButton");
-    startSimulationButton.disabled = false;
-    startSimulationButton.style.color = "white";
-
-    clearInterval(simulationInterval);
+    // Enable Start Button (Start Simulation Button Disables Start Button)
+    enableStartButton();
     simulationState = "idle";
+
+    // Clear Virus Simulation Interval, Stopping communication w/ Mesa Model
+    if (modelType == "virus") {
+        clearInterval(virusSimulationInterval);
+    }
+
+    // Stop Tornado Simulation Function
+    else if (modelType == "tornado"){
+        stopTornadoSimulation();
+    }
 }
 
-// Function to update the HTML elements with the simulation information
-function updateSimulationInfo(result) {
+// Function to update the HTML elements with the simulation information from the Virus Mesa WebSocket
+function updateStatisticsWebSocket(result) {
     document.getElementById("simulationStep").innerHTML = "Step: " + result.step;
-    
-    if (modelType == "tornado") {
-        document.getElementById("statistic4").style.display = "none";
 
-        document.getElementById("statistic1").innerHTML = "Safe: " + result.safe;
-        document.getElementById("statistic2").innerHTML = "Injured: " + result.injured;
-        document.getElementById("statistic3").innerHTML = "Dead: " + result.dead;
-
-        //document.getElementById("statistic4").innerHTML = "Days until first casuality:" + result.days_til_cas;
-    } 
-    else if (modelType == "virus") {
+    if (modelType == "virus") {
         document.getElementById("statistic4").style.display = "flex";
 
         document.getElementById("statistic1").innerHTML = "Infected: " + result.infected;
@@ -278,45 +207,11 @@ function updateSimulationInfo(result) {
     }
 }
 
-function updateVirusSimulationCharts(result){
-    infectedCount = result.infected
-    susceptibleCount = result.susceptible
-    resistantCount = result.resistant
-    deadCount = result.dead
-
-    pieChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
-    pieChart.update();
-
-    lineChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
-    lineChart.update();
-
-    barChart.data.datasets[0].data = [infectedCount, susceptibleCount, resistantCount, deadCount];
-    barChart.update();
-}
-
-function updateTornadoSimulationCharts(result){
-    injuredCount = result.injured
-    safeCount = result.safe
-    deadCount = result.dead
-
-    pieChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
-    pieChart.update();
-
-    lineChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
-    lineChart.update();
-
-    barChart.data.datasets[0].data = [injuredCount, safeCount, deadCount];
-    barChart.update();
-}
-
-function updateVirusVisuals(data){
-    var agent_states = data.agent_states;
-    updateMarkers(agent_states);
-}
-
+// Function to Handle Logic for which Simulation is currently in use
 function selectModel(button) {
     var buttons = document.querySelectorAll(".simulationButtons");
 
+    // Find which disaster simulation button has been selected by user (virus by default)
     buttons.forEach(function(btn) {btn.classList.remove("selected");});
     button.classList.add("selected");
 
@@ -328,84 +223,13 @@ function selectModel(button) {
         selectTornadoModel();
         modelType = "tornado";
     }
-
-    mapState = "populated";
-    socket.emit("model_type_change", {model_type: modelType})
 }
 
-function updateSliderText(sliderName, Title) {
-    document.getElementById(sliderName).innerText = Title;
-}
-
-function updateSliderRange(sliderID, minValue, maxValue, defaultValue, step) {
-    document.getElementById(sliderID).min = minValue;
-    document.getElementById(sliderID).max = maxValue;
-    document.getElementById(sliderID).value = defaultValue;
-    document.getElementById(sliderID).step = step;
-
-    var sliderValueText = document.getElementById(sliderID + "Value");
-    sliderValueText.textContent = defaultValue.toString();
-}
-
-
-function selectTornadoModel() {
-    // Update slider names and labels for Tornado Model
-    updateSliderText("slider1Name", "Number of Steps");
-    updateSliderRange("slider1", 1, 100, 10, 1);
-
-    updateSliderText("slider2Name", "Number of Agents");
-    updateSliderRange("slider2", 1, 100, 10, 1);
-
-    updateSliderText("slider3Name", "Initial Safe Size");
-    updateSliderRange("slider3", 1, 10, 3, 1);
-
-    updateSliderText("slider4Name", "Tornado Move Chance");
-    updateSliderRange("slider4", 0.0, 1, 0.3, 0.1);
-
-    updateSliderText("slider5Name", "Tornado Radius");
-    updateSliderRange("slider5", 1, 5, 1, 1);
-
-    updateSliderText("slider6Name", "Tornado Intensity");
-    updateSliderRange("slider6", 0.0, 1, 0.3, 0.1);
-
-    updateSliderText("slider7Name", "Death Rate");
-    updateSliderRange("slider7", 0.0, 1, 0.3, 0.1);
-
-    updateSliderText("slider8Name", "Simulation Speed");
-    updateSliderRange("slider8", 1, 3, 3, 1);
-
-    //update simulation informational stats to focus on tornado model
-    document.getElementById("statistic4").style.display = "none";
-
-    document.getElementById("simulationStep").innerText = "Steps:";
-    document.getElementById("statistic1").innerText = "Safe:";
-    document.getElementById("statistic2").innerText = "Injured:";
-    document.getElementById("statistic3").innerText = "Dead:";
-
-    //update color key to focus on tornado model
-    document.getElementById("deadRectangle").style.display = "none";
-    document.getElementById("deadLabel").style.display = "none";
-
-    document.getElementById("susceptibleLabel").innerText = "Safe";
-    document.getElementById("resistantLabel").innerText = "Injured";
-    document.getElementById("infectedLabel").innerText = "Dead";
-
-    resetTornadoSliders();
-    resetVirusSliders();
-    initializeTornadoMap();
-    mapState = "populated";
-}
-
+// Function to adjust all HTML elements and map elements to those in the Virus Workflow
 function selectVirusModel() {
     // Update slider names and labels for Virus Model
-    updateSliderText("slider1Name", "Number of Steps");
-    updateSliderRange("slider1", 1, 100, 10, 1);
-
     updateSliderText("slider2Name", "Number of Agents");
     updateSliderRange("slider2", 1, 100, 10, 1);
-
-    updateSliderText("slider3Name", "Initial Outbreak");
-    updateSliderRange("slider3", 1, 10, 1, 1);
 
     updateSliderText("slider4Name", "Virus Spread Radius");
     updateSliderRange("slider4", 1, 10, 1, 1);
@@ -422,7 +246,17 @@ function selectVirusModel() {
     updateSliderText("slider8Name", "Simulation Speed");
     updateSliderRange("slider8", 1, 3, 3, 1);
 
-    //update simulation informational stats to focus on virus model
+    // Ensure Sliders that were hidden in the Tornado Model Workflow are visible
+    document.getElementById("slider1Name").style.display = 'flex';
+    document.getElementById("slider1Value").style.display = 'flex';
+    document.getElementById("slider1").style.display = 'flex';
+
+    document.getElementById("slider3Name").style.display = 'flex';
+    document.getElementById("slider3Value").style.display = 'flex';
+    document.getElementById("slider3").style.display = 'flex';
+
+    // Ensure simulation statistics show the Virus Model information
+    document.getElementById("statistic3").style.display = "flex";
     document.getElementById("statistic4").style.display = "flex";
 
     document.getElementById("simulationStep").innerText = "Steps:";
@@ -431,7 +265,7 @@ function selectVirusModel() {
     document.getElementById("statistic3").innerText = "Resistant:";
     document.getElementById("statistic4").innerText = "Dead:";
 
-    //update color key to focus on virus model
+    // Make the Dead Label Visible as this element is not used in the Tornado Model
     document.getElementById("deadRectangle").style.display = "flex";
     document.getElementById("deadLabel").style.display = "flex";
 
@@ -440,10 +274,62 @@ function selectVirusModel() {
     document.getElementById("infectedLabel").innerText = "Infected";
     document.getElementById("deadLabel").innerHTML = "Dead";
 
-    resetTornadoSliders();
+    // Ensure graphs, slider values, and map show virus model defaults
+    setDefaultVirusGraphs();
     resetVirusSliders();
     initializeVirusMap();
     mapState = "populated";
 }
 
+// Function to adjust all HTML elements and map elements to those in the Tornado Workflow
+function selectTornadoModel() {
+    // Update slider names and labels for Tornado Model
+    updateSliderText("slider2Name", "Number of Agents");
+    updateSliderRange("slider2", 1, 100, 10, 1);
 
+    updateSliderText("slider4Name", "Tornado Move Chance");
+    updateSliderRange("slider4", 0.0, 1, 0.8, 0.1);
+
+    updateSliderText("slider5Name", "Tornado Radius");
+    updateSliderRange("slider5", 0.0, 1, 0.5, 1);
+
+    updateSliderText("slider6Name", "Tornado Intensity");
+    updateSliderRange("slider6", 0.0, 1, 0.3, 0.1);
+
+    updateSliderText("slider7Name", "Death Rate");
+    updateSliderRange("slider7", 0.0, 1, 0.3, 0.1);
+
+    updateSliderText("slider8Name", "Simulation Speed");
+    updateSliderRange("slider8", 1, 3, 3, 1);
+
+    // Ensure Sliders that are shown in the Virus Model Workflow are hidden
+    document.getElementById("slider1Name").style.display = 'none';
+    document.getElementById("slider1Value").style.display = 'none';
+    document.getElementById("slider1").style.display = 'none';
+    
+    document.getElementById("slider3Name").style.display = 'none';
+    document.getElementById("slider3Value").style.display = 'none';
+    document.getElementById("slider3").style.display = 'none';
+
+    // Ensure simulation statistics show the Tornado Model information, need to hide one box as Tornado agents have 1 less state than Virus agents do
+    document.getElementById("statistic3").style.display = "none";
+    document.getElementById("statistic4").style.display = "none";
+
+    document.getElementById("simulationStep").innerText = "Safe:";
+    document.getElementById("statistic1").innerText = "Injured:";
+    document.getElementById("statistic2").innerText = "Dead:";
+
+    // Make the Dead Label Hidden as this element is not used in the Tornado Model
+    document.getElementById("deadRectangle").style.display = "none";
+    document.getElementById("deadLabel").style.display = "none";
+
+    document.getElementById("susceptibleLabel").innerText = "Safe";
+    document.getElementById("resistantLabel").innerText = "Injured";
+    document.getElementById("infectedLabel").innerText = "Dead";
+
+    // Ensure graphs, slider values, and map show tornado model defaults
+    setDefaultTornadoGraphs();
+    resetTornadoSliders();
+    initializeTornadoMap();
+    mapState = "populated";
+}

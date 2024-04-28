@@ -1,70 +1,68 @@
+// Register the ChartDeferred plugin for deferred loading, enhancing performance on initial page load
 Chart.register(ChartDeferred);
-        Chart.Tooltip.positioners.customPosition = function (elements, eventPosition) {
-            return {
-            x: eventPosition.x,
-            y: eventPosition.y,
-            };
-        };
 
-        var infectedCount = 1
-        var susceptibleCount = 9
-        var resistantCount = 0
-        var deadCount = 0
+// Customize the tooltip positioning to dynamically follow the cursor during mouse events
+Chart.Tooltip.positioners.customPosition = function (elements, eventPosition) {
+    return {
+        x: eventPosition.x,
+        y: eventPosition.y,
+    };
+};
 
-        var ctx = document.getElementById("lineChart").getContext("2d");
-        var lineChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: ["Infected", "Susceptible", "Resistant", "Dead"],
-                datasets: [{
-                    data: [infectedCount, susceptibleCount, resistantCount, deadCount],
-                    backgroundColor: [
-                        "rgba(255, 0, 0, 0.2)",
-                        "rgba(144, 238, 144, 0.2)",
-                        "rgba(128, 128, 128, 0.2)",
-                        "rgba(0, 0, 0, 0.2)"
-                    ],
-                    barPercentage: 0.9,
-                    categoryPercentage: 0.9,
-                    borderWidth: 0,
-                    borderColor: [
-                        "rgba(255, 0, 0, 1)",
-                        "rgba(144, 238, 144, 1)",
-                        "rgba(128, 128, 128, 1)",
-                        "rgba(0, 0, 0, 1)"
-                    ],
-                    borderWidth: 2
-                }],
+// Retrieve the drawing context of the canvas element intended for the line chart
+var ctx = document.getElementById("lineChart").getContext("2d");
+
+// Instantiate a new Chart object to create a line chart
+var lineChart = new Chart(ctx, {
+    type: "line",
+    data: {
+        labels: ["Infected", "Susceptible", "Resistant", "Dead"],
+        datasets: [{
+            data: [infectedCount, susceptibleCount, resistantCount, deadCount],
+            backgroundColor: [
+                "rgba(255, 0, 0, 0.2)",
+                "rgba(144, 238, 144, 0.2)",
+                "rgba(128, 128, 128, 0.2)",
+                "rgba(0, 0, 0, 0.2)"
+            ],
+            borderWidth: 2,
+            borderColor: [
+                "rgba(255, 0, 0, 1)",
+                "rgba(144, 238, 144, 1)",
+                "rgba(128, 128, 128, 1)",
+                "rgba(0, 0, 0, 1)"
+            ]
+        }],
+    },
+    options: {
+        cutout: "50%",
+        aspectRatio: 1,
+        animation: {
+            duration: 0,  // Disable animations for instant chart updates
+            animateRotate: false,
+            animateScale: false
+        },
+        scales: {
+            x: {
+                display: false  // Hide the x-axis to simplify the chart's appearance
             },
-            options: {
-                cutout: "50%",
-                aspectRatio: 1,
-                animation: {
-                    duration: 0,
-                    animateRotate: false,
-                    animateScale: false
-                },
-                scales: {
-                    x: {
-                        display: false
-                    },
-                    y: {
-                        display: false
-                    }
-                },
-            plugins: {            
-                deferred: {
-                delay: 100,
-                },
-                legend: {
-                display: false,
-                },
-                tooltip: {
+            y: {
+                display: true  // Display the y-axis for quantitative assessment
+            }
+        },
+        plugins: {
+            deferred: {
+                delay: 100  // Delay rendering to allow other page elements to load first
+            },
+            legend: {
+                display: false  // Disable the legend as the dataset labels are self-explanatory
+            },
+            tooltip: {
                 bodyFont: {
-                    size: 24,
-                    weight: 700,
-                },
+                    size: 24,  // Increase tooltip text size for better readability
+                    weight: 700,  // Bold the tooltip text for emphasis
                 },
             },
-            },
-        });
+        },
+    },
+});

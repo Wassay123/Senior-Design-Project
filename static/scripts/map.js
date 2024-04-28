@@ -1,115 +1,68 @@
+// Define polygons for major areas in New York City to be used in simulations
 let manhattanPolygon, brooklynPolygon, statenIslandPolygon;
-let markerData = [];
-let people_markers = [];
-let people_coordinates = [];
-let tornado;
 
+// Array to store data related to each marker on the map for simulation tracking
+let markerData = [];
+
+// Array to hold marker objects that represent people in the simulation
+let people_markers = [];
+
+// Array to store coordinates of each person marker
+let people_coordinates = [];
+
+// Declare variables surrounding the tornado marker
+let tornado;  
+let initial_tornado_lat; 
+let initial_tornado_lng; 
+let tornado_lat;  
+let tornado_lng; 
+
+// Define the bounds within which the tornado can start its path
+let tornado_top_bound_start_point = 40.98096762416953;  // Northernmost point for tornado start
+let tornado_bottom_bound_start_point = 40.48096762416953;  // Southernmost point for tornado start
+let tornado_start;  // Stores initial starting point of the tornado
+
+// Initialize the map with specific bounds for New York City
 let map = L.map('map', {
     maxBounds: [
-        [40.98096762416953, -73.67364618257551], // South-West coordinates of New York City
-        [40.44698013459168, -74.24768182710676]  // North-East coordinates of New York City
+        [40.98096762416953, -73.67364618257551], // North-East coordinates of the bounding box
+        [40.44698013459168, -74.24768182710676]  // South-West coordinates of the bounding box
     ]
 });
 
-let city_coordinates = [[40.59096762416953, -74.14364618257551], [40.63096762416953, -73.95364618257551],
-                    [40.85096762416953, -73.88364618257551], [40.9396762416953, -73.81364618257551],
-                    [40.7096762416953, -73.80364618257551]]
+// Array of coordinates representing safe haven cities or locations within the tornado simulation area
+let city_coordinates = [
+    [40.59096762416953, -74.14364618257551],  
+    [40.63096762416953, -73.95364618257551],  
+    [40.85096762416953, -73.88364618257551],  
+    [40.9396762416953, -73.81364618257551],   
+    [40.7096762416953, -73.80364618257551] 
+];
 
-let next_city_index_dict_if_tornado_above = {0:0,
-                                            1:0,
-                                            2:1,
-                                            3:4,
-                                            4:1};
-
-let next_city_index_dict_if_tornado_below = {0:1,
-                                            1:4,
-                                            2:3,
-                                            3:3,
-                                            4:3};
-
-let people_nearest_cities = [];
-let people_speeds = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
-let people_step_sizes = [[], [], [], [], [], [], [], [], [], []];
-let people_moving = [false, false, false, false, false,
-                     false, false, false, false, false]
-
-const markerHtmlStyles = (color) => `
-    background-color: ${color};
-    width: 2rem;
-    height: 2rem;
-    display: block;
-    left: -1.5rem;
-    top: -1.5rem;
-    position: relative;
-    border-radius: 3rem 3rem 0;
-    transform: rotate(45deg);
-    border: 1px solid #FFFFFF`;
-
-const cityHtmlStyles = (color) => `
-    background-color: ${color};
-    width: 3rem;
-    height: 3rem;
-    display: block;
-    left: -1.5rem;
-    top: -1.5rem;
-    position: relative;
-    border-radius: 3rem 3rem 0;
-    transform: rotate(45deg);
-    border: 1px solid #FFFFFF`;
-
-// Create custom marker icons with predefined color names
-const greenIcon = L.divIcon({
-    className: 'my-custom-pin',
-    iconAnchor: [0, 24],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${markerHtmlStyles('green')}"></span>`
-});
-
-const blueIcon = L.divIcon({
-    className: 'my-custom-pin',
-    iconAnchor: [0, 24],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${cityHtmlStyles('blue')}"></span>`
-});
-
-const redIcon = L.divIcon({
-    className: 'my-custom-pin',
-    iconAnchor: [0, 24],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${markerHtmlStyles('red')}"></span>`
-});
-
-const greyIcon = L.divIcon({
-    className: 'my-custom-pin',
-    iconAnchor: [0, 24],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${markerHtmlStyles('grey')}"></span>`
-});
-
-const blackIcon = L.divIcon({
-    className: 'my-custom-pin',
-    iconAnchor: [0, 24],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${cityHtmlStyles('black')}"></span>`
-});
-
+/**
+ * Initializes the map specifically for the virus simulation model.
+ * This function clears the map, sets up base layers, defines regions as polygons,
+ * and initializes the simulation with default agent states.
+ */
 function initializeVirusMap() {
+    // Remove all existing layers and markers to prepare for a new simulation setup.
     clearMap();
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+    // Add OpenStreetMap tiles as the base layer of the map.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
     
+    // Set the map's view to fit the predefined bounds, focusing on New York City.
     map.fitBounds([
-        [40.98096762416953, -73.67364618257551],
-        [40.44698013459168, -74.24768182710676] 
+        [40.98096762416953, -73.67364618257551], // North-East corner
+        [40.44698013459168, -74.24768182710676]  // South-West corner
     ]);
     
+    // Ensure the zoom level does not go beyond what is specified for these bounds.
     map.setMinZoom(map.getBoundsZoom(map.options.maxBounds));
 
+    // Define coordinates for a polygon representing Manhattan.
     var manhattanCoordinates = [
         [40.97278146829103, -73.8706581072941],
         [40.96915383694315, -73.70516416745767],
@@ -121,11 +74,13 @@ function initializeVirusMap() {
         [40.968635587611566, -73.87615168206047]
     ];
 
+    // Create and add the polygon for Manhattan without any visible border or fill color.
     manhattanPolygon = L.polygon(manhattanCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
+        color: 'none',
+        fillColor: 'none',
     }).addTo(map);
 
+    // Define coordinates for a polygon representing Brooklyn.
     var brooklynCoordinates = [
         [40.77972251660068, -73.9091131306586],
         [40.75373081845422, -73.84662371769132],
@@ -142,11 +97,13 @@ function initializeVirusMap() {
         [40.74489132542966, -73.95031494140626]
     ];
 
+    // Create and add the polygon for Brooklyn.
     brooklynPolygon = L.polygon(brooklynCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
-    }).addTo(map); // Add the polygon to the map
+        color: 'none',
+        fillColor: 'none',
+    }).addTo(map);
 
+    // Define coordinates for a polygon representing Staten Island.
     var statenIslandCoordinates = [
         [40.63872577325326, -74.0801006452614],
         [40.62153604099451, -74.0807873421072],
@@ -158,30 +115,44 @@ function initializeVirusMap() {
         [40.6324754735059, -74.18653865635952]
     ];
 
+    // Create and add the polygon for Staten Island.
     statenIslandPolygon = L.polygon(statenIslandCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
-    }).addTo(map); // Add the polygon to the map
+        color: 'none',
+        fillColor: 'none',
+    }).addTo(map);
 
-    // Simulation initializes as virus model with 9 susceptible (green) and 1 infected (red) agents
+    // Start the simulation with 9 susceptible agents (green) and 1 infected agent (red).
     placeAgents(9, 'green');
     placeAgents(1, 'red');
 
+    // Emit the initial setup of agent positions to the backend to initialize the simulation's map of agents
     socket.emit('simulation_points', {agent_points: markerData});
 }
 
+/**
+ * Initializes the map specifically for the tornado simulation model.
+ * Clears existing map data, sets up base layers, defines geographic regions,
+ * and places initial agents and tornado elements.
+ */
 function initializeTornadoMap(){
+    // Clear any existing markers or layers to prepare for new simulation setup.
     clearMap();
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+    // Add OpenStreetMap tiles as the base layer of the map.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
     
+    // Set the map's view to encompass the predefined bounds, focusing on New York City.
     map.fitBounds([
-        [40.98096762416953, -73.67364618257551],
-        [40.44698013459168, -74.24768182710676] 
+        [40.98096762416953, -73.67364618257551], // North-East corner
+        [40.44698013459168, -74.24768182710676]  // South-West corner
     ]);
     
+    // Ensure the zoom level is appropriately set to show the entire specified area.
     map.setMinZoom(map.getBoundsZoom(map.options.maxBounds));
 
+    // Define coordinates for the Manhattan region, to be represented as a polygon.
     var manhattanCoordinates = [
         [40.97278146829103, -73.8706581072941],
         [40.96915383694315, -73.70516416745767],
@@ -193,11 +164,13 @@ function initializeTornadoMap(){
         [40.968635587611566, -73.87615168206047]
     ];
 
+    // Add the polygon for Manhattan to the map with no visible borders or fill color.
     manhattanPolygon = L.polygon(manhattanCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
+        color: 'none',
+        fillColor: 'none',
     }).addTo(map);
 
+    // Define coordinates and create a polygon for Brooklyn.
     var brooklynCoordinates = [
         [40.77972251660068, -73.9091131306586],
         [40.75373081845422, -73.84662371769132],
@@ -214,11 +187,13 @@ function initializeTornadoMap(){
         [40.74489132542966, -73.95031494140626]
     ];
 
+    // Add the polygon for Brooklyn to the map.
     brooklynPolygon = L.polygon(brooklynCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
-    }).addTo(map); // Add the polygon to the map
+        color: 'none',
+        fillColor: 'none',
+    }).addTo(map);
 
+    // Define coordinates and create a polygon for Staten Island.
     var statenIslandCoordinates = [
         [40.63872577325326, -74.0801006452614],
         [40.62153604099451, -74.0807873421072],
@@ -230,16 +205,18 @@ function initializeTornadoMap(){
         [40.6324754735059, -74.18653865635952]
     ];
 
+    // Add the polygon for Staten Island to the map.
     statenIslandPolygon = L.polygon(statenIslandCoordinates, {
-        color: 'none', // Set the border color to none
-        fillColor: 'none', // Set the fill color
-    }).addTo(map); // Add the polygon to the map
+        color: 'none',
+        fillColor: 'none',
+    }).addTo(map);
 
+    // Place initial agents (all 'green' for safe) on the map for the tornado simulation.
     placeAgents(10, 'green');
 
+    // Initialize additional elements specific to the tornado simulation like the tornado itself and city markers.
     defineTornadoAndCities();
 }
-
 
 // Function to generate a random point within a polygon
 function generateRandomPointInPolygon(polygon) {
@@ -268,16 +245,20 @@ function isPointInsidePolygon(point, polygon) {
     var polyPoints = polygon.getLatLngs()[0];
     var x = point.lng, y = point.lat;
     var inside = false;
+
     for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+
         var xi = polyPoints[i].lng, yi = polyPoints[i].lat;
         var xj = polyPoints[j].lng, yj = polyPoints[j].lat;
-        var intersect = ((yi > y) != (yj > y)) &&
-            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+        var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
     }
+
     return inside;
 }
 
+// Function to place agents according to the population distributions of NYC Burroughs
 function placeAgents(numMarkers, color) {
     // Population Density Coefficients for each polygon. Each is normalized to sum to 1
     var manhattanCoefficient = 0.3253012048192771;
@@ -300,7 +281,7 @@ function placeAgents(numMarkers, color) {
             point = generateRandomPointInPolygon(statenIslandPolygon);
         }
 
-        var icon_type = getColorIcon(color);
+        var icon_type = getIconByColor(color);
         let person = L.marker(point, {icon: icon_type}).addTo(map);
         people_coordinates.push([point.lat, point.lng])
         people_markers.push(person);
@@ -308,43 +289,27 @@ function placeAgents(numMarkers, color) {
     }
 }
 
-function getColorIcon(color) {
-    switch (color) {
-        case 'green':
-            return greenIcon;
-        case 'red':
-            return redIcon;
-        case 'grey':
-            return greyIcon;
-        case 'black':
-            return blackIcon;
-        case 'blue':
-            return blueIcon;
-        default:
-            return null;
-    }
-}
-
+// Clears all non-tile layers from the map and resets related data structures.
 function clearMap() {
-    // Remove all layers except the tile layer (base map)
     map.eachLayer(function(layer) {
-        if (!layer._url) { // If it's not the tile layer
+        if (!layer._url) { // The tile layer has a URL property
             map.removeLayer(layer);
         }
     });
 
-    // You might also want to reset any global variables used by simulations here
+    // Reset simulation data and variables.
     markerData = [];
     people_markers = [];
     people_coordinates = [];
-    // Add any other necessary resets
+    people_nearest_cities = [];
+    city_populations = Array(city_coordinates.length).fill(0);
+    after_animation = 200;
 }
 
+// Updates markers on the map to reflect changes in agent states.
 function updateMarkers(agent_states) {
-    // Clear existing markers
-    resetMap();
+    resetMap(); // Clear existing markers before updating
 
-    // Assume agent_states is an array like [0, 1, 2, 0, 1], where 0: Safe (Green), 1: Infected (Red), 2: Dead (Black)
     agent_states.forEach((state, index) => {
         const agentInfo = markerData[index];
         const icon_type = getIconByAgentState(state);
@@ -352,21 +317,7 @@ function updateMarkers(agent_states) {
     });
 }
 
-function getIconByAgentState(state) {
-    switch (state) {
-        case 0: // SAFE
-            return greenIcon;
-        case 1: // INFECTED
-            return redIcon;
-        case 2: // DEAD
-            return greyIcon;
-        case 3:
-            return blackIcon;
-        default:
-            return greenIcon; // For any other state, if applicable
-    }
-}
-
+// Resets the map by removing all feature layers and re-adding necessary polygons.
 function resetMap(){
     map.eachLayer(function(layer) {
         if (!!layer.toGeoJSON) {
@@ -374,97 +325,53 @@ function resetMap(){
         }
     });
 
-    // Add polygons back after clearing
+    // Re-add essential polygons for simulation context.
     manhattanPolygon.addTo(map);
     brooklynPolygon.addTo(map);
     statenIslandPolygon.addTo(map);
 }
 
+// Resets marker arrays and reinitializes simulation variables for tornado settings.
 function resetMarkers(){
     markerData = [];
     people_markers = [];
     people_coordinates = [];
+    people_speeds = Array(num_of_agents).fill(200);
+    people_step_sizes = Array(num_of_agents).fill([]);
+    people_moving = Array(num_of_agents).fill(false);
+    people_alive = Array(num_of_agents).fill(true);
+
+    // Recalculate starting positions for the tornado based on random boundaries.
+    tornado_start = Math.random() * (tornado_top_bound_start_point - tornado_bottom_bound_start_point) + tornado_bottom_bound_start_point;
+    tornado_lat = tornado_start;
+    tornado_lng = initial_tornado_lng;
 }
 
+// Initializes tornado and city markers on the map for the tornado simulation.
+function defineTornadoAndCities() {
+    // Determine random starting position for the tornado within defined bounds.
+    tornado_start = Math.random() * (tornado_top_bound_start_point - tornado_bottom_bound_start_point) + tornado_bottom_bound_start_point;
 
-let executed = false;
-
-function evacuate() {
-    let tornadoLatLng = tornado.getLatLng();
-    let tornadoLat = tornadoLatLng.lat;
-    let tornadoLng = tornadoLatLng.lng;
-    const evacuationDistance = 0.1; // Set the distance threshold for evacuation
-
-    for (let i = 0; i < people_markers.length; i++) {
-        let person = people_markers[i];
-        let personLatLng = person.getLatLng();
-        let personLat = personLatLng.lat;
-        let personLng = personLatLng.lng;
-
-        // Calculate the distance between the person and the tornado
-        let distance = Math.sqrt(Math.pow(tornadoLat - personLat, 2) + Math.pow(tornadoLng - personLng, 2));
-        
-
-        if (distance < evacuationDistance) {
-            if (!people_moving[i]) {
-                people_moving[i] = true;
-                let next_city_index = next_city_index_dict_if_tornado_below[people_nearest_cities[i]];
-                const random_city_offset = (Math.random() - 0.5) * 0.1;
-                let next_city_coordinates = [city_coordinates[next_city_index][0]+random_city_offset, city_coordinates[next_city_index][1]+random_city_offset];
-                
-                let step_size_x = (next_city_coordinates[0] - people_coordinates[i][0]) / people_speeds[i];
-                let step_size_y = (next_city_coordinates[1] - people_coordinates[i][1]) / people_speeds[i];
-                people_step_sizes[i] = [step_size_x, step_size_y];
-
-            }
-        }
-        if (people_speeds[i] > 0 && people_moving[i]){
-            // Move the person away from the tornado (adjust latitude and longitude)
-            let newPersonLat = personLat + people_step_sizes[i][0]; // Move person's latitude away from tornado
-            let newPersonLng = personLng + people_step_sizes[i][1]; // Move person's longitude away from tornado
-            
-            people_coordinates[i][0] = newPersonLat;
-            people_coordinates[i][1] = newPersonLng;
-
-            // display updated marker on the map
-            person.setLatLng({ lat: people_coordinates[i][0], lng: people_coordinates[i][1] });
-            people_speeds[i]--;
-        }
-        if (people_speeds[i] == 0){
-            people_moving[i] = false;
-            people_speeds[i] = 100;
-        }
+    // Initialize tornado position if the simulation hasn't started yet.
+    if (!simulation_started) {
+        tornado_lat = tornado_start;
+        tornado_lng = -74.43066400484114;
+        initial_tornado_lat = tornado_lat;
+        initial_tornado_lng = tornado_lng;
     }
-}
 
-function assign_people_to_city() {
-    for (let person = 0; person < people_coordinates.length; person++) {
-        
-        // setting to 100 just because it is a number that will always be higher than the first distance calculation
-        let minimum_distance_to_city = 100;
-        let minimum_city_index = 100;
-        for (let city = 0; city < city_coordinates.length; city++){
-            let current_distance_to_city = Math.sqrt(Math.pow(Math.abs(people_coordinates[person][0] - city_coordinates[city][0]), 2) + Math.pow(Math.abs(people_coordinates[person][1] - city_coordinates[city][1]), 2));
-            
-            if (current_distance_to_city < minimum_distance_to_city) {
-                minimum_distance_to_city = current_distance_to_city;
-                minimum_city_index = city;
-            }
-        }
-        
-        people_nearest_cities.push(minimum_city_index)
-    }
-}
+    // Create and add a draggable tornado marker to the map.
+    tornado = L.marker({lat: tornado_lat, lng: tornado_lng}, {icon: tornadoIcon, draggable: true}).addTo(map);
+    tornado.on('dragend', tornado_drag_function);
 
-function defineTornadoAndCities(){
-    tornado = tornado = L.marker({lat: 40.614509227686754, lng: -74.43066400484114}, {icon: blackIcon}).addTo(map);
+    // Place markers for cities using predefined coordinates.
     city0 = L.latLng(city_coordinates[0][0], city_coordinates[0][1]);
     city1 = L.latLng(city_coordinates[1][0], city_coordinates[1][1]);
     city2 = L.latLng(city_coordinates[2][0], city_coordinates[2][1]);
     city3 = L.latLng(city_coordinates[3][0], city_coordinates[3][1]);
     city4 = L.latLng(city_coordinates[4][0], city_coordinates[4][1]);
 
-    var icon_type = getColorIcon('blue');
+    var icon_type = getIconByColor('blue');
     L.marker(city0, {icon: icon_type}).addTo(map);
     markerData.push({coordinates: [city0.lat, city0.lng], color: 'blue'});
 
@@ -481,43 +388,9 @@ function defineTornadoAndCities(){
     markerData.push({coordinates: [city4.lat, city4.lng], color: 'blue'});
 }
 
-function testFunction() {
-    assign_people_to_city()
-    console.log(people_nearest_cities)
-    if (executed) {
-        map.removeLayer(polyline);
-    }
-
-    let final_x_tornado_position = -73.44768182710676;
-    let current_lat = 40.614509227686754;
-    let current_lng = -74.43066400484114;
-    let tornadoPath = []; // Array to store tornado path coordinates
-
-    let x_step = (final_x_tornado_position - current_lng) / 500;
-
-    let interval = setInterval(() => {
-        if (current_lng < final_x_tornado_position) {
-
-            // move tornado ------------------------
-            const lngIncrement = (Math.random() - 0.5) * 0.01; // Random value between -0.005 and 0.005
-            current_lat += lngIncrement;
-            current_lng += x_step;
-            tornado.setLatLng({ lat: current_lat, lng: current_lng });
-            lat = tornado.getLatLng().lat;
-            lng = tornado.getLatLng().lng;
-            tornadoPath.push([current_lat, current_lng]); // Store current position in tornadoPath
-            // -----------------------------------------
-
-            // Clear existing polyline and create a new one with updated path
-            if (tornadoPath.length > 1) {
-                map.removeLayer(polyline); // Remove previous polyline
-            }
-            polyline = L.polyline(tornadoPath, { color: 'black' }).addTo(map); // Add updated polyline
-            evacuate()
-
-        } else {
-            clearInterval(interval);
-            executed = true;
-        }
-    }, 10);    
+// Updates the visual representation of agents based on their current states in the virus simulation.
+function updateVirusVisuals(data) {
+    // Extract agent states from data and update markers accordingly.
+    var agent_states = data.agent_states;
+    updateMarkers(agent_states);
 }

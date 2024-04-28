@@ -1,4 +1,4 @@
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap');
 *{
     margin: 0;
     padding: 0;
@@ -10,24 +10,12 @@ body{
 }
 button {
     display: block;
-
 }
-#ball {
-    width: 25px;
-    height: 25px;
-    background-color: red;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translate(-50%, -50%); /* Center the ball both horizontally and vertically */
-    border-radius: 50%;
-}
-
 .city {
     width: 30px;
     height: 30px;
     background-color: blue;
-    position: absolute; /* Position the city absolutely within the map container */
+    position: absolute;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -35,7 +23,6 @@ button {
     color: white;
     font-size: 14px;
 }
-
 .person {
     width: 15px;
     height: 15px;
@@ -45,68 +32,6 @@ button {
     font-size: 14px;
     position: absolute;
 }
-
-/* Define fixed positions for the cities */
-#city0 { top: 82%; left: 15%; }
-#city1 { top: 70%; left: 20%; }
-#city2 { top: 75%; left: 30%; }
-#city3 { top: 65%; left: 50%; }
-#city4 { top: 50%; left: 50%; }
-#city5 { top: 20%; left: 60%; }
-#city6 { top: 45%; left: 70%; }
-
-#person0_tl { top: calc(82% - 15px); left: calc(15% - 15px);}
-#person0_tr { top: calc(82% - 15px); left: calc(15% + 25px);}
-#person0_bl { top: calc(82% + 25px); left: calc(15% - 15px);}
-#person0_br { top: calc(82% + 25px); left: calc(15% + 25px);}
-
-/* For City 1 */
-#person1_tl { top: calc(70% - 15px); left: calc(20% - 15px);}
-#person1_tr { top: calc(70% - 15px); left: calc(20% + 25px);}
-#person1_bl { top: calc(70% + 25px); left: calc(20% - 15px);}
-#person1_br { top: calc(70% + 25px); left: calc(20% + 25px);}
-
-/* For City 2 */
-#person2_tl { top: calc(75% - 15px); left: calc(30% - 15px);}
-#person2_tr { top: calc(75% - 15px); left: calc(30% + 25px);}
-#person2_bl { top: calc(75% + 25px); left: calc(30% - 15px);}
-#person2_br { top: calc(75% + 25px); left: calc(30% + 25px);}
-
-/* For City 3 */
-#person3_tl { top: calc(65% - 15px); left: calc(50% - 15px);}
-#person3_tr { top: calc(65% - 15px); left: calc(50% + 30px);}
-#person3_bl { top: calc(65% + 25px); left: calc(50% - 15px);}
-#person3_br { top: calc(65% + 25px); left: calc(50% + 30px);}
-
-/* For City 4 */
-#person4_tl { top: calc(50% - 15px); left: calc(50% - 15px);}
-#person4_tr { top: calc(50% - 15px); left: calc(50% + 25px);}
-#person4_bl { top: calc(50% + 25px); left: calc(50% - 15px);}
-#person4_br { top: calc(50% + 25px); left: calc(50% + 25px);}
-
-/* For City 5 */
-#person5_tl { top: calc(20% - 15px); left: calc(60% - 15px);}
-#person5_tr { top: calc(20% - 15px); left: calc(60% + 25px);}
-#person5_bl { top: calc(20% + 25px); left: calc(60% - 15px);}
-#person5_br { top: calc(20% + 25px); left: calc(60% + 25px);}
-
-/* For City 6 */
-#person6_tl { top: calc(45% - 15px); left: calc(70% - 15px);}
-#person6_tr { top: calc(45% - 15px); left: calc(70% + 25px);}
-#person6_bl { top: calc(45% + 25px); left: calc(70% - 15px);}
-#person6_br { top: calc(45% + 25px); left: calc(70% + 25px);}
-
-#path {
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-#pathLine {
-    fill: none;
-    stroke: black;
-    stroke-width: 2;
-}
-
 .result{
     color: white;
 }
@@ -129,14 +54,6 @@ button {
     margin-bottom: 4%;
     opacity: 0.6;
     text-shadow: 0 0 2px rgba(255,255, 255, 0.8);
-}
-#leftPanelTitle{
-    padding-top: 2%;
-    display: flex;
-    justify-content: center;
-    color: grey;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
 }
 .parameterPanel{
     height: 99vh;
@@ -180,7 +97,7 @@ button {
     border-radius: 50%;
     opacity: 1;
     transition: background 0.2s, opacity 0.2s;
-  }
+}
 .allTheSliders:hover::-webkit-slider-thumb{
     background: rgb(98, 37, 122);
     opacity: 1;
@@ -249,6 +166,18 @@ button {
     height: 50%;
     width: 9%;
 }
+.simulationButtons.selected {
+    background-color: rgb(40, 40, 103); 
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(0, 0, 255, 0.5);
+}
+#leftPanelTitle{
+    padding-top: 2%;
+    display: flex;
+    justify-content: center;
+    color: grey;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
 #susceptibleRectangle{
     background-color: rgba(144, 238, 144, 0.2);
     border: 2px solid rgba(144, 238, 144, 0.8);
@@ -299,12 +228,18 @@ button {
 #lineChartGraph {
     height: 100%;
     width: 45%; 
-    margin: 0 2%;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 3%;
 }
 #barChartGraph {
     height: 100%;
     width: 45%;
-    margin: 0 2%;
+    margin-top: 0;
+    margin-right: 3%;
+    margin-bottom: 0;
+    margin-left: 0;
 }
 #result {
     color: white;
@@ -381,12 +316,8 @@ button {
     box-shadow: 0 0 16px rgba(0, 0, 255, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.6);
     color: white;
 }
-.simulationButtons.selected {
-    background-color: rgb(40, 40, 103); 
-    box-shadow: 0 0 16px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(0, 0, 255, 0.5);
-}
 #mapContainer {
-    position: relative; /* Set the map container to relative positioning */
+    position: relative; 
     height: 90%;
     width: 100%;
     display: flex;
@@ -406,7 +337,7 @@ button {
     color: white;
 }
 #map {
-    position: relative; /* Set the map container to relative positioning */
+    position: relative;
     height: 80%;
     width: 100%;
     display: flex;
@@ -420,4 +351,3 @@ button {
     margin-bottom: 1rem; 
     color: white;
 }
-

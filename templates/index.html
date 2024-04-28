@@ -5,17 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel= "stylesheet" type= "text/css" href= "../static/styles/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@2.0.0/dist/chartjs-plugin-deferred.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <title>Virus Simulation</title>
+    <title>Disaster Simulations</title>
 
 </head>
 
@@ -37,7 +35,7 @@
 
         <p class="namesOfParameters" id="slider3Name">Initial Outbreak</p>
         <div class="slidersAndValues">
-        <input id="slider3", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider3Value', this.value); updateChartsBySliders(this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
+        <input id="slider3", type="range" min="1" max="10" value="1" step="1" class="allTheSliders" oninput="updateValue('slider3Value', this.value)" onmouseover="makeParameterTitleBold(this)" onmouseout="revertParameterTitle(this)">
         <span id="slider3Value" class="sliderValues">1</span>
         </div>
 
@@ -85,7 +83,6 @@
             <button class="simulationButtons" id="startSimulationButton" onclick="startSimulation()"> Start Simulation </button>
             <button class="simulationButtons" id="stopSimulationButton" onclick="stopSimulation()"> Stop Simulation </button>
             <button class="simulationButtons" id="resetSimulationButton" onclick="resetSimulation()"> Reset Simulation </button>
-            <button id="TestButton" onclick="testFunction()">test</button>
         </div>
 
         <div id="map"></div>
@@ -145,10 +142,14 @@
     </section>
 
     <script src="../static/scripts/map.js"> </script>
+    <script src="../static/scripts/mapHelper.js"> </script>
     <script src="../static/scripts/simulation.js"> </script>
-    <script src="../static/scripts/lineChart.js"> </script>
+    <script src="../static/scripts/simulationHelper.js"> </script>
     <script src="../static/scripts/pieChart.js"> </script>
+    <script src="../static/scripts/lineChart.js"> </script>
     <script src="../static/scripts/barChart.js"> </script>
+    <script src="../static/scripts/tornadoModel.js"> </script>
+
 
 </body>
 </html>
