@@ -1,13 +1,10 @@
-# README: Flask Web App with Mesa Simulation
+## How to edit/use
+App.py is the main file that controls the deployment of the project.
 
-## Project Overview
+- **app.py** If you want to run the project this is the file you need to run. This file is executed with the python3 app.py command. It deploys on a local server with the address 127.0.0.1:5000. You can press CTRL+C in the terminal to quit the simulation and website. This file mainly just controls deployment and connecting the pieces together with websockets.
 
-This GitHub repository contains a Flask web application that integrates a Python Mesa simulation. The simulation provides a dynamic and interactive environment, while the Flask web app serves as the user interface. The front end is built using HTML, CSS, and JavaScript.
+- **index.html** This file contains the HTML code for the website that 'app.py' runs.
 
-## Features
+- **static folder** This folder includes two subfolders. Scripts which holds all the javascript files, and styles, which contains the CSS file referred to by the HTML.
 
-- **Mesa Simulation:** The core of the project is a simulation implemented using Mesa, a Python library for agent-based modeling. The simulation can be configured to model various scenarios, making it a powerful tool for studying complex systems.
-
-- **Flask Web App:** The web application is built using Flask, a lightweight web framework in Python. Flask is used to create the user interface and handle requests and responses between the client and the server.
-
-- **Interactive User Interface:** The HTML, CSS, and JavaScript components create an interactive and visually appealing user interface. Users can interact with the simulation, adjust parameters, and visualize the results in real-time.
+- **model.py** This file contains the main model code that utilizes Mesa for simulation. You can adjust parameters in the 'VirusOnNetwork' class constructor to edit the model. Each individual agent in the model is represented by the 'VirusAgent' class. You can also add additional data collection in the 'DataCollector' class, which is constructed within the model class. You can adjust parameters in the website, but if you want to change the available ranges, you can do so in this file.
