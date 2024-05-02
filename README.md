@@ -1,8 +1,10 @@
-# Flask Web App with Mesa Simulation
+# Interactive Virus Outbreak and Tornado Modeling Simulation
 
 ## Overview
 
-This project is for simulation of disasters such as viruses or tornadoes.
+Our work seeks to model and understand the dynamics of natural disasters. Users can witness the impacts of attributes such as wind speed or mortality rate on the overall trajectories and severities of disasters from tornadoes to virus outbreaks. This allows for not only future disaster emulation but also for insights into previous disasters. Our current work is focused on simulating these occurrences in New York City, however, the trends found can be used to understand broad disaster behavior.
+
+The value of this project lies in its ability to deepen our understanding of disasters and their consequences in an intuitive and interesting format. To understand the behaviors of virus spreading, many people generally understand how a disease spreads to people close to you, but not how fast a disease can spread to 100 people from 3 infected people within a set radius. Much logic in our current tornado and virus simulations can be expanded to other disastrous events such as typhoons or flooding for potential future work.
 
 ## Usage
 
